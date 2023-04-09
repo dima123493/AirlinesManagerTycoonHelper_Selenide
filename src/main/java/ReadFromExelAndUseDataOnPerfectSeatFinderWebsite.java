@@ -1,11 +1,6 @@
 import com.codeborne.selenide.Configuration;
-import com.codeborne.selenide.ElementsCollection;
-import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.openqa.selenium.By;
+import pages.finderWebsite.PerfectSeatFinderPage;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,25 +14,35 @@ record TableRow(String destinationHubValue,
                 String economyPriceValue,
                 String businessPriceValue,
                 String firstPriceValue,
-                String cargoPriceValue,
-                String km) {
-}
+                String cargoPriceValue) { } //,String km
 
 public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
     static final String URL = "https://destinations.noway.info/en/seatconfigurator/index.html";
-    static final String sourceHubValue = "KBP";
-    static String numberOfWavesNeeded;
+     static final String sourceHubValue = "KBP";
+     //String numberOfWavesNeeded;
 
     public static void main(String[] args) {
-        ReadRecords reader = new ReadRecords();
+        ReadFile reader = new ReadFile();
         var dataFromExcel = reader.readFile();
         List<List<String>> dataFromPerfecrSeatFinderSite = new ArrayList<>();
         for (var row : dataFromExcel) {
-            insertValuesFromExelOnThePerfecrSeatFinderWebsite(row);
-            dataFromPerfecrSeatFinderSite.add(collectDataFromPerfecrSeatFinderWebSite());
+            //insertValuesFromExelOnThePerfecrSeatFinderWebsite(row);
+
+            Configuration.browserSize = "1920x1080";
+            open(URL);
+
+            PerfectSeatFinderPage perfectSeatFinderPage = new PerfectSeatFinderPage();
+
+            perfectSeatFinderPage.fillTheFieldsOnTheWebsite(sourceHubValue,row.destinationHubValue(),
+                    row.economyDemandValue(),row.businessDemandValue(),row.firstDemandValue(),
+                    row.cargoDemandValue(),row.economyPriceValue(),row.businessPriceValue(),
+                    row.firstPriceValue(),row.cargoPriceValue());
+
+
+            dataFromPerfecrSeatFinderSite.add(perfectSeatFinderPage.collectDataFromPerfecrSeatFinderWebSite());
             clearBrowserCookies();
         }
-        RecordResult.writeInfoFromPerfecrSeatFinderWebsite(dataFromPerfecrSeatFinderSite);
+        RecordFile.writeInfoFromPerfecrSeatFinderWebsite(dataFromPerfecrSeatFinderSite);
         closeWebDriver();
     }
 
@@ -76,8 +81,11 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
         return dataFromExcel;
     }*/
 
+
+/*
     public static void insertValuesFromExelOnThePerfecrSeatFinderWebsite(TableRow row) {
-        String iframe4 = "aswift_4";
+*/
+/*        String iframe4 = "aswift_4";
         String closeAdd = "//div[@class='grippy-host']";
         String aircraftManufacturerFeld = "cf_aircraftmake";
         String aircraftManufacturer = "//*[@id=\"cf_aircraftmake\"]/option[6]";//Bombardier
@@ -99,14 +107,19 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
         String avoidNegativeConfigurationsCheckBox = "nonegativeconfig";
         String calculateButton = "calculate_button";
         String selectDropdown = "//*[@id=\"nwy_seatconfigurator_wave_1_stats\"]/table[1]/tbody/tr[3]/td[1]/select";
-        String waveDropdown = "//select[@name='nwy_seatconfigurator_wave_1_selector']//option";
+        String waveDropdown = "//select[@name='nwy_seatconfigurator_wave_1_selector']//option";*//*
 
 
-        Configuration.browserSize = "1920x1080";
-        open(URL);
+
+        */
+/*Configuration.browserSize = "1920x1080";
+        open(URL);*//*
+
+
         //switchTo().frame($(By.id(iframe4)));
 
-        $(By.id(aircraftManufacturerFeld)).click();
+*/
+/*        $(By.id(aircraftManufacturerFeld)).click();
         $x(aircraftManufacturer).click();
         $(By.id(aircraftModelField)).click();
         $x(aircraftModel).click();
@@ -137,15 +150,17 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
         $(By.id(avoidNegativeConfigurationsCheckBox)).click();
         $(By.id(calculateButton)).click();
         $x(selectDropdown).click();
-        $x(selectDropdown).selectOption(lastElementValueInTheDropDown($$x(waveDropdown)));
-    }
+        $x(selectDropdown).selectOption(lastElementValueInTheDropDown($$x(waveDropdown)));*//*
 
-    public static String lastElementValueInTheDropDown(ElementsCollection dropdownList) {
+    }
+*/
+
+/*    public static String lastElementValueInTheDropDown(ElementsCollection dropdownList) {
         numberOfWavesNeeded = dropdownList.get(dropdownList.size() - 1).getAttribute("value");
         return numberOfWavesNeeded;
-    }
+    }*/
 
-    public static List<String> collectDataFromPerfecrSeatFinderWebSite() {
+/*    public static List<String> collectDataFromPerfecrSeatFinderWebSite() {
         String wavesNum = numberOfWavesNeeded;
 
         String ecoSeats = "//*[@id=\"nwy_seatconfigurator_wave_" + wavesNum + "_stats\"]/table[1]/tbody/tr[3]/td[2]";
@@ -170,6 +185,6 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
         String cargPriceResult = $x(crgPrie).getText().trim().replaceAll("\\D+", "");
 
         return List.of(wavesNum, aitaCodeResult, ecoSeatResult, busSeatResult, fitstSeatResult, cargSeatResult, ecoPriceResult, busPriceResult, firstPriceResult, cargPriceResult);
-    }
+    }*/
 
 }
