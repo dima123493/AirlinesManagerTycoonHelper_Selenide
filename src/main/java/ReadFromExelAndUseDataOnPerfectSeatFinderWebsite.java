@@ -6,19 +6,9 @@ import java.util.List;
 
 import static com.codeborne.selenide.Selenide.*;
 
-record TableRow(String destinationHubValue,
-                String economyDemandValue,
-                String businessDemandValue,
-                String firstDemandValue,
-                String cargoDemandValue,
-                String economyPriceValue,
-                String businessPriceValue,
-                String firstPriceValue,
-                String cargoPriceValue) { } //,String km
-
 public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
-    static final String URL = "https://destinations.noway.info/en/seatconfigurator/index.html";
-     static final String sourceHubValue = "KBP";
+    static final String URL = "https://destinations.noway.info/en/seatconfigurator/index.html"; //TODO
+     static final String sourceHubValue = "KBP"; //TODO
      //String numberOfWavesNeeded;
 
     public static void main(String[] args) {
@@ -33,10 +23,12 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
 
             PerfectSeatFinderPage perfectSeatFinderPage = new PerfectSeatFinderPage();
 
-            perfectSeatFinderPage.fillTheFieldsOnTheWebsite(sourceHubValue,row.destinationHubValue(),
+/*            perfectSeatFinderPage.fillTheFieldsOnTheWebsite(sourceHubValue,row.destinationHubValue(),
                     row.economyDemandValue(),row.businessDemandValue(),row.firstDemandValue(),
                     row.cargoDemandValue(),row.economyPriceValue(),row.businessPriceValue(),
-                    row.firstPriceValue(),row.cargoPriceValue());
+                    row.firstPriceValue(),row.cargoPriceValue());*/
+
+            perfectSeatFinderPage.fillTheFieldsOnTheWebsite(sourceHubValue,row);
 
 
             dataFromPerfecrSeatFinderSite.add(perfectSeatFinderPage.collectDataFromPerfecrSeatFinderWebSite());
@@ -46,8 +38,8 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
         closeWebDriver();
     }
 
-   /* public static List<TableRow> readFile() {
-        List<TableRow> dataFromExcel = new ArrayList<>();
+   /* public static List<infoFromFiles.TableRow> readFile() {
+        List<infoFromFiles.TableRow> dataFromExcel = new ArrayList<>();
 
         try (OPCPackage pkg = OPCPackage.open(Path.of("D:\\Miracle.xlsx").toFile());
              XSSFWorkbook workbook = new XSSFWorkbook(pkg);
@@ -64,7 +56,7 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
                 var firstPriceValue = sheet.getRow(i).getCell(7).getStringCellValue();
                 var cargoPriceValue = sheet.getRow(i).getCell(8).getStringCellValue();
                 var km = sheet.getRow(i).getCell(9).getStringCellValue();
-                dataFromExcel.add(new TableRow(destinationHubValue,
+                dataFromExcel.add(new infoFromFiles.TableRow(destinationHubValue,
                         economyDemandValue,
                         businessDemandValue,
                         firstDemandValue,
@@ -83,7 +75,7 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
 
 
 /*
-    public static void insertValuesFromExelOnThePerfecrSeatFinderWebsite(TableRow row) {
+    public static void insertValuesFromExelOnThePerfecrSeatFinderWebsite(infoFromFiles.TableRow row) {
 */
 /*        String iframe4 = "aswift_4";
         String closeAdd = "//div[@class='grippy-host']";

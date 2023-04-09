@@ -1,4 +1,4 @@
-package pages;
+package pages.airlineManagerWebsite;
 
 import org.openqa.selenium.By;
 
@@ -12,7 +12,7 @@ public class RoutePricePage {
     String reliabilityStateEN = "Very unreliable";
     String amountOfMoneyInMyAccount = "ressource3";
     String performAudit = "//*[@id=\"marketing_linePricing\"]/div[1]/a/span";//hover,click
-    String auditPrice = "//*[@id=\"popupContainer\"]/div[2]/p/span";//hover,click
+    String auditPrice = "//*[@id=\"popupContainer\"]/div[2]/p/span";
     String performAuditButton = "//div[@id='popupContainer']//span[@id='internalAuditButton']";
     String declineAuditButton = "//*[@id=\"popupContainer\"]/div[3]/span";
 
@@ -31,9 +31,13 @@ public class RoutePricePage {
     }
 
     public void applyNewPrices(String economyPrice, String businessPrice, String firstPrice, String crgPrice) {
+        $(By.id(economyClassPrice)).clear();
         $(By.id(economyClassPrice)).setValue(economyPrice);
+        $(By.id(businessClassPrice)).clear();
         $(By.id(businessClassPrice)).setValue(businessPrice);
+        $(By.id(firstClassPrice)).clear();
         $(By.id(firstClassPrice)).setValue(firstPrice);
+        $(By.id(cargoPrice)).clear();
         $(By.id(cargoPrice)).setValue(crgPrice);
         $x(submitPricesButton).click();
     }

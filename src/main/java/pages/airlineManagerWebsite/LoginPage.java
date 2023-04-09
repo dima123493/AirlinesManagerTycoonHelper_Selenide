@@ -1,4 +1,4 @@
-package pages;
+package pages.airlineManagerWebsite;
 
 import org.openqa.selenium.By;
 

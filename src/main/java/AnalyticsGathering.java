@@ -1,7 +1,8 @@
-import pages.LoginPage;
-import pages.RouteDetailsPage;
-import pages.RouteListPage;
-import pages.RoutePricePage;
+import infoFromFiles.TableRow;
+import pages.airlineManagerWebsite.LoginPage;
+import pages.airlineManagerWebsite.RouteDetailsPage;
+import pages.airlineManagerWebsite.RouteListPage;
+import pages.airlineManagerWebsite.RoutePricePage;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,23 +10,22 @@ import java.nio.file.Path;
 import java.util.*;
 
 import static com.codeborne.selenide.Selenide.*;
-import static pages.RouteDetailsPage.airportName;
-import static pages.RouteDetailsPage.linkToPricesPage;
+import static java.lang.System.getProperty;
 
-record AeroportToPriceRef (
+/*record AeroportToPriceRef (
     String aeroportName,
     String hrefToPrice
-){}
+){}*/
 
 public class AnalyticsGathering {
-    public static final String URL = "https://tycoon.airlines-manager.com/";
+    public static final String URL = getProperty("airlines-manager-base-url");
 
     public static void main(String[] args) {
         int totalLinksNumber;
-        loginOnWebsite("fokist@outlook.com", "9#T253yT");
+        loginOnWebsite(getProperty("login-email"), getProperty("login-password"));
 
         RouteListPage routeListPage = new RouteListPage();
-        open(URL + "network/showhub/5702176/linelist");
+        open(URL + "network/showhub/" + getProperty("hub-link-id") + "/linelist");
         totalLinksNumber = routeListPage.countLinks();
         routeListPage.sortByRoutLength();
 
@@ -33,24 +33,12 @@ public class AnalyticsGathering {
         routeListPage.getHrefsFromRouteList(routeInfoHrefs);
         routeListPage.printCollectedLinksAndCheckAmountOfItems(routeInfoHrefs, totalLinksNumber);
 
-        RecordResult info = new RecordResult();
+        RecordFile info = new RecordFile();
 
         List<String> listOfKms = new ArrayList<>();
         routeListPage.distanceOfTheRoutes(listOfKms);
 
-        info.writeValuesForEachRoute(listOfKms,"DistanceInKm");
-
-/*        String airportName = "//*[@id=\"box2\"]/li[4]/b";
-
-        String economyDemand = "//*[@id=\"marketing_linePricing\"]/div[3]/div[1]/div[3]/b";
-        String businessDemand = "//*[@id=\"marketing_linePricing\"]/div[3]/div[2]/div[3]/b";
-        String firstDemand = "//*[@id=\"marketing_linePricing\"]/div[3]/div[3]/div[3]/b";
-        String cargoDemand = "//*[@id=\"marketing_linePricing\"]/div[3]/div[4]/div[3]/b";
-
-        String economyPrice = "//*[@id=\"marketing_linePricing\"]/div[3]/div[1]/div[2]/b";
-        String businessPrice = "//*[@id=\"marketing_linePricing\"]/div[3]/div[2]/div[2]/b";
-        String firstPrice = "//*[@id=\"marketing_linePricing\"]/div[3]/div[3]/div[2]/b";
-        String cargoPrice = "//*[@id=\"marketing_linePricing\"]/div[3]/div[4]/div[2]/b";*/
+        info.writeValuesForEachRoute(listOfKms,getProperty("file-name-for-gathered-distance"));
 
         Map<String, String> nameOfAirportAndLink = new LinkedHashMap<>();
 
@@ -60,19 +48,20 @@ public class AnalyticsGathering {
        // List<AeroportToPriceRef> keyvals = new ArrayList<>();
         for (String href : routeInfoHrefs) {
             open(href);
+            routePage.collectAirPotNamesAndLinks(nameOfAirportAndLink);
             //SelenideElement link = $x("//*[@id=\"showLine\"]/div[5]/div/a");
-            String key = $x(airportName).getText().trim().toUpperCase().substring(0, 3);
-            String value = linkToPricesPage.getAttribute("href");
+
+            //String key = $x(airportName).getText().trim().toUpperCase().substring(0, 3);
+           // String value = $x(linkToPricesPage).getAttribute("href");
            // keyvals.add(new AeroportToPriceRef(key, value));
-            nameOfAirportAndLink.put(key, value);
+            //nameOfAirportAndLink.put(key, value);
         }
         //System.out.println("==========");
        // System.out.println(keyvals);
       //  System.out.println("==========");
 
-        List<String> linksToPricePage = new ArrayList<>();
-        linksToPricePage.addAll(nameOfAirportAndLink.values());
-        info.writeValuesForEachRoute(linksToPricePage, "LinksToPricePageForEachRoute");
+        List<String> linksToPricePage = new ArrayList<>(nameOfAirportAndLink.values());
+        info.writeValuesForEachRoute(linksToPricePage, getProperty("file-name-for-gathered-links-to-price-page"));
         System.out.println(linksToPricePage);
 
         routePage.collectDemandValueAndPrices(nameOfAirportAndLink, rows);
@@ -102,7 +91,6 @@ public class AnalyticsGathering {
             rows.add(List.of(name, newEcoDemand, newBusinDemand, newFrtDemand, newCargDemand, newEcoPrice, newbusinPrice, newFrtPrice, newCargPrice));
 
         }*/
-
         info.writeInfoFromInfoPage(rows);
         closeWebDriver();
     }
@@ -119,30 +107,41 @@ public class AnalyticsGathering {
 
 }
 
-class ManagePricesPage {
-    static final int CRJ_1000_MAX_DISTANCE = 3129;
+class ManagePrices {
+    public static final String URL = getProperty("airlines-manager-base-url");
+    static final int CRJ_1000_MAX_DISTANCE = 3129;//TODO change this!!!
 
     public static void main(String[] args) throws IOException {
-        var file1 = Path.of("D:\\LinksToPricePageForEachRoute.txt");
-        var file2 = Path.of("D:\\DistanceInKm.txt");
+        var file1 = Path.of("D:\\AirlinesManager\\LinksToPricePageForEachRoute.txt");
+        var file2 = Path.of("D:\\AirlinesManager\\DistanceInKm.txt");
         List<String> pricePages = Files.readAllLines(file1);
         List<String> kilometers = Files.readAllLines(file2);
-        List<TableRow> fileInfo = ReadRecords.readFile();
+        List<TableRow> fileInfo = ReadFile.readFile();
         if (!(pricePages.size() == kilometers.size() && kilometers.size() == fileInfo.size())) {
-            throw new IllegalStateException("Number of rows do not match");
+            throw new IllegalStateException("Number of rows in files do not match");
         }
+
+        LoginPage mainPage = new LoginPage();
+        try {
+            open(URL);
+            mainPage.login(getProperty("login-email"), getProperty("login-password"));
+        } catch (Exception e) {
+            System.out.println("Email or password is incorrect!");
+        }
+
+
         for (int i = 0; i < pricePages.size(); i++) {
-            var kilometerage = Integer.parseInt(kilometers.get(i));
+            int kilometerage = Integer.parseInt(kilometers.get(i));
             var row = fileInfo.get(i);
-            if (kilometerage > CRJ_1000_MAX_DISTANCE) {
-                continue;
+            if (kilometerage < CRJ_1000_MAX_DISTANCE) {// TODO if ReadFromExcel...Class checks multiple planes - this "if" is useless
+                open(pricePages.get(i));
+                String economyPrice = row.economyPriceValue();
+                String businessPrice = row.businessPriceValue();
+                String firstPrice = row.firstPriceValue();
+                String cargoPrice = row.cargoPriceValue();
+                managePricesForRoute(economyPrice,businessPrice,firstPrice,cargoPrice);
             }
-            open(pricePages.get(i));
-            String economyPrice = row.economyPriceValue();
-            String businessPrice = row.businessPriceValue();
-            String firstPrice = row.firstPriceValue();
-            String cargoPrice = row.cargoPriceValue();
-            managePricesForRoute(economyPrice,businessPrice,firstPrice,cargoPrice);
+
         }
 
 //        var resultMap = combineTwoListsIntoHashMap(pricePages, kilometers);

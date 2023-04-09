@@ -1,6 +1,7 @@
-package pages;
+package pages.airlineManagerWebsite;
 
 import com.codeborne.selenide.ElementsCollection;
+import com.codeborne.selenide.SelenideElement;
 import org.openqa.selenium.By;
 
 import java.util.List;
@@ -8,14 +9,16 @@ import java.util.List;
 import static com.codeborne.selenide.Selenide.*;
 
 public class RouteListPage {
-    String getLastPage = "//a[normalize-space()='>>']";
-    String getPageNumber = "//span[@class='current']";
-    String getFirstPage = "//a[normalize-space()='<<']";
     String sortByRoutLength = "//input[@value='distanceMinus']";
 
     String distance = "//*[@id=\"lineList\"]//ul/li[1]/b";
 
-/*    public int getTotalPageNumberAndReturnToFirstPage() {
+/*
+    String getLastPage = "//a[normalize-space()='>>']";
+    String getPageNumber = "//span[@class='current']";
+    String getFirstPage = "//a[normalize-space()='<<']";
+
+        public int getTotalPageNumberAndReturnToFirstPage() {
         String lastPageLink = $x(getLastPage).getAttribute("href");
         open(lastPageLink);
         int totalPageNumberCount = parseInt($x(getPageNumber).getText());
@@ -34,22 +37,19 @@ public class RouteListPage {
         return linksArray.size();
     }
 
-    public List<String> getHrefsFromRouteList(List<String> links) {
+    public void getHrefsFromRouteList(List<String> links) {
         ElementsCollection linksArray = $$x("//*[@id=\"lineList\"]/div/div/a");
-        for (int i = 0; i < linksArray.size(); i++) {
-            links.add(linksArray.get(i).getAttribute("href"));
+        for (SelenideElement selenideElement : linksArray) {
+            links.add(selenideElement.getAttribute("href"));
         }
-        return links;
     }
 
-    public List<String> distanceOfTheRoutes(List<String> listOfKms) {
+    public void distanceOfTheRoutes(List<String> listOfKms) {
         ElementsCollection linksArray = $$x(distance);
-
-        for (int i = 0; i < linksArray.size(); i++) {
-            listOfKms.add(String.valueOf(linksArray.get(i)).replaceAll("\\D+", ""));
+        for (SelenideElement selenideElement : linksArray) {
+            listOfKms.add(String.valueOf(selenideElement).replaceAll("\\D+", ""));
         }
-        System.out.println("Route length in km");
-        return listOfKms;
+        System.out.println("Route length in km was gathered");
     }
 
     public void printCollectedLinksAndCheckAmountOfItems(List<String> hrefs, int totalLinksNumber) {

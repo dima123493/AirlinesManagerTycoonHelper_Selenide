@@ -9,7 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-public class RecordResult {
+public class RecordFile {
 
 /*    public static void main(String[] args) {
         Map<String, String> nameOfAirportAndLink = new LinkedHashMap<>();
@@ -56,7 +56,7 @@ public class RecordResult {
 
     }
 
-    public static void writeValuesForEachRoute(int value, String fileName) {
+    /*public static void writeValuesForEachRoute(int value, String fileName) {
         File file = new File("D:\\" + fileName + ".txt");
         try {
             if (file.createNewFile()) {
@@ -83,7 +83,7 @@ public class RecordResult {
             throw new RuntimeException(e);
         }
 
-    }
+    }*/
 
     public void writeInfoFromInfoPage(List<List<String>> rows) {
         File xlsxFile = new File("D:\\Miracle.xlsx");

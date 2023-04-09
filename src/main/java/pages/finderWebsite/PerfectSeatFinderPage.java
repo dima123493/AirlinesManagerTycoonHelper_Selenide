@@ -1,6 +1,7 @@
 package pages.finderWebsite;
 
 import com.codeborne.selenide.ElementsCollection;
+import infoFromFiles.TableRow;
 import org.openqa.selenium.By;
 
 import java.util.List;
@@ -11,9 +12,9 @@ public class PerfectSeatFinderPage {
     String iframe4 = "aswift_4";
     String closeAdd = "//div[@class='grippy-host']";
     String aircraftManufacturerFeld = "cf_aircraftmake";
-    String aircraftManufacturer = "//*[@id=\"cf_aircraftmake\"]/option[6]";//Bombardier
+    String aircraftManufacturer = "//*[@id=\"cf_aircraftmake\"]/option[6]";//TODO Bombardier
     String aircraftModelField = "cf_aircraftmodel";
-    String aircraftModel = "//*[@id=\"cf_aircraftmodel\"]/option[1]";//CRJ-1000 (850 km/h)
+    String aircraftModel = "//*[@id=\"cf_aircraftmodel\"]/option[1]";//TODO CRJ-1000 (850 km/h)
     String changeTypeToInputForSourceHub = "//*[@id=\"nwy_airport_fullsearch\"]/table/tbody/tr[1]/td/a";
     final String sourceHub = "cf_hub_src";
     String changeTypeToInputForDestinationHub = "//*[@id=\"nwy_airport_dst_fullsearch\"]/table/tbody/tr[1]/td/a";
@@ -33,11 +34,7 @@ public class PerfectSeatFinderPage {
     String waveDropdown = "//select[@name='nwy_seatconfigurator_wave_1_selector']//option";
 
     static String numberOfWavesNeeded;
-    public void fillTheFieldsOnTheWebsite(String sourceHubValue, String destinationHubValue,
-                                          String economyDemandValue, String businessDemandValue,
-                                          String firstDemandValue, String cargoDemandValue,
-                                          String economyPriceValue, String businessPriceValue,
-                                          String firstPriceValue, String cargoPriceValue){
+    public void fillTheFieldsOnTheWebsite(String sourceHubValue, TableRow row){
         $(By.id(aircraftManufacturerFeld)).click();
         $x(aircraftManufacturer).click();
         $(By.id(aircraftModelField)).click();
@@ -48,23 +45,23 @@ public class PerfectSeatFinderPage {
         //actions().moveToElement($x(closeAdd).shouldBe(Condition.appear)).click().perform();
         $x(changeTypeToInputForDestinationHub).click();
         $(By.id(destinationHub)).click();
-        $(By.id(destinationHub)).setValue(destinationHubValue);
+        $(By.id(destinationHub)).setValue(row.destinationHubValue());
         $(By.id(economyDemand)).click();
-        $(By.id(economyDemand)).setValue(economyDemandValue);
+        $(By.id(economyDemand)).setValue(row.economyDemandValue());
         $(By.id(businessDemand)).click();
-        $(By.id(businessDemand)).setValue(businessDemandValue);
+        $(By.id(businessDemand)).setValue(row.businessDemandValue());
         $(By.id(firstDemand)).click();
-        $(By.id(firstDemand)).setValue(firstDemandValue);
+        $(By.id(firstDemand)).setValue(row.firstDemandValue());
         $(By.id(cargoDemand)).click();
-        $(By.id(cargoDemand)).setValue(cargoDemandValue);
+        $(By.id(cargoDemand)).setValue(row.cargoDemandValue());
         $(By.id(economyPrice)).click();
-        $(By.id(economyPrice)).setValue(economyPriceValue);
+        $(By.id(economyPrice)).setValue(row.economyPriceValue());
         $(By.id(businessPrice)).click();
-        $(By.id(businessPrice)).setValue(businessPriceValue);
+        $(By.id(businessPrice)).setValue(row.businessPriceValue());
         $(By.id(firstPrice)).click();
-        $(By.id(firstPrice)).setValue(firstPriceValue);
+        $(By.id(firstPrice)).setValue(row.firstPriceValue());
         $(By.id(cargoPrice)).click();
-        $(By.id(cargoPrice)).setValue(cargoPriceValue);
+        $(By.id(cargoPrice)).setValue(row.economyPriceValue());
         $(By.id(addToCircuitButton)).click();
         $(By.id(avoidNegativeConfigurationsCheckBox)).click();
         $(By.id(calculateButton)).click();

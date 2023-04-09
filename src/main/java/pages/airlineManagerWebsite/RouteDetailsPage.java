@@ -1,6 +1,4 @@
-package pages;
-
-import org.openqa.selenium.By;
+package pages.airlineManagerWebsite;
 
 import java.util.List;
 import java.util.Map;
