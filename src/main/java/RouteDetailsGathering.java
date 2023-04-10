@@ -1,23 +1,23 @@
+import filesManagment.ReadFile;
+import filesManagment.RecordFile;
 import infoFromFiles.TableRow;
-import pages.airlineManagerWebsite.LoginPage;
-import pages.airlineManagerWebsite.RouteDetailsPage;
-import pages.airlineManagerWebsite.RouteListPage;
-import pages.airlineManagerWebsite.RoutePricePage;
+import pages.airlineManagerWebsite.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import static com.codeborne.selenide.Selenide.*;
-import static java.lang.System.getProperty;
+import static com.codeborne.selenide.Selenide.closeWebDriver;
+import static com.codeborne.selenide.Selenide.open;
+import static propertyLoader.AirlinesProperties.getProperty;
 
 /*record AeroportToPriceRef (
     String aeroportName,
     String hrefToPrice
 ){}*/
 
-public class AnalyticsGathering {
+public class RouteDetailsGathering {
     public static final String URL = getProperty("airlines-manager-base-url");
 
     public static void main(String[] args) {
@@ -38,27 +38,27 @@ public class AnalyticsGathering {
         List<String> listOfKms = new ArrayList<>();
         routeListPage.distanceOfTheRoutes(listOfKms);
 
-        info.writeValuesForEachRoute(listOfKms,getProperty("file-name-for-gathered-distance"));
+        info.writeValuesForEachRoute(listOfKms, getProperty("file-name-for-gathered-distance"));
 
         Map<String, String> nameOfAirportAndLink = new LinkedHashMap<>();
 
         List<List<String>> rows = new ArrayList<>();
 
         RouteDetailsPage routePage = new RouteDetailsPage();
-       // List<AeroportToPriceRef> keyvals = new ArrayList<>();
+        // List<AeroportToPriceRef> keyvals = new ArrayList<>();
         for (String href : routeInfoHrefs) {
             open(href);
             routePage.collectAirPotNamesAndLinks(nameOfAirportAndLink);
             //SelenideElement link = $x("//*[@id=\"showLine\"]/div[5]/div/a");
 
             //String key = $x(airportName).getText().trim().toUpperCase().substring(0, 3);
-           // String value = $x(linkToPricesPage).getAttribute("href");
-           // keyvals.add(new AeroportToPriceRef(key, value));
+            // String value = $x(linkToPricesPage).getAttribute("href");
+            // keyvals.add(new AeroportToPriceRef(key, value));
             //nameOfAirportAndLink.put(key, value);
         }
         //System.out.println("==========");
-       // System.out.println(keyvals);
-      //  System.out.println("==========");
+        // System.out.println(keyvals);
+        //  System.out.println("==========");
 
         List<String> linksToPricePage = new ArrayList<>(nameOfAirportAndLink.values());
         info.writeValuesForEachRoute(linksToPricePage, getProperty("file-name-for-gathered-links-to-price-page"));
@@ -108,7 +108,6 @@ public class AnalyticsGathering {
 }
 
 class ManagePrices {
-    public static final String URL = getProperty("airlines-manager-base-url");
     static final int CRJ_1000_MAX_DISTANCE = 3129;//TODO change this!!!
 
     public static void main(String[] args) throws IOException {
@@ -120,14 +119,7 @@ class ManagePrices {
         if (!(pricePages.size() == kilometers.size() && kilometers.size() == fileInfo.size())) {
             throw new IllegalStateException("Number of rows in files do not match");
         }
-
-        LoginPage mainPage = new LoginPage();
-        try {
-            open(URL);
-            mainPage.login(getProperty("login-email"), getProperty("login-password"));
-        } catch (Exception e) {
-            System.out.println("Email or password is incorrect!");
-        }
+        loginOnWebsite(getProperty("login-email"), getProperty("login-password"));
 
 
         for (int i = 0; i < pricePages.size(); i++) {
@@ -139,7 +131,7 @@ class ManagePrices {
                 String businessPrice = row.businessPriceValue();
                 String firstPrice = row.firstPriceValue();
                 String cargoPrice = row.cargoPriceValue();
-                managePricesForRoute(economyPrice,businessPrice,firstPrice,cargoPrice);
+                managePricesForRoute(economyPrice, businessPrice, firstPrice, cargoPrice);
             }
 
         }
@@ -164,6 +156,16 @@ class ManagePrices {
         managePricesForRoute.applyNewPrices(economyPrice, businessPrice, firstPrice, crgPrice);
     }
 
+    public static void loginOnWebsite(String email, String password) {
+        LoginPage mainPage = new LoginPage();
+        try {
+            open(getProperty("airlines-manager-base-url"));
+            mainPage.login(email, password);
+        } catch (Exception e) {
+            System.out.println("Email or password is incorrect!");
+        }
+    }
+
 /*    public static Map<String, Integer> combineTwoListsIntoHashMap(List<String> pricePages, List<String> kilometers) {
         Map<String, Integer> resultMap = new LinkedHashMap<>();
         for (int i = 0; i < pricePages.size(); i++) {
@@ -171,4 +173,40 @@ class ManagePrices {
         }
         return resultMap;
     }*/
+}
+
+class PlanesManagement {
+    public static void main(String[] args) {
+        loginOnWebsite(getProperty("login-email"), getProperty("login-password"));
+
+        List<String> linksToPlaneDetailsPage = new LinkedList<>();
+
+        PlanesListPage planeList = new PlanesListPage();
+        int totalNumberOfPlaneListPages = countTotalPagesWithPlanes(planeList);
+        for (int i = 1; i <= totalNumberOfPlaneListPages; i++) {
+            planeList.getHrefsFromPlanesList(linksToPlaneDetailsPage);
+            if (i >= 1 && i < totalNumberOfPlaneListPages) {
+                planeList.goToNextPage();
+            }
+        }
+
+
+
+    }
+
+    public static int countTotalPagesWithPlanes(PlanesListPage planeList) {
+        open("https://tycoon.airlines-manager.com/aircraft");
+        return planeList.getTotalPageNumberAndReturnToFirstPage();
+    }
+
+    public static void loginOnWebsite(String email, String password) {
+        LoginPage mainPage = new LoginPage();
+        try {
+            open(getProperty("airlines-manager-base-url"));
+            mainPage.login(email, password);
+        } catch (Exception e) {
+            System.out.println("Email or password is incorrect!");
+        }
+    }
+
 }
