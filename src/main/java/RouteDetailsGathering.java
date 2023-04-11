@@ -178,25 +178,42 @@ class ManagePrices {
 class PlanesManagement {
     public static void main(String[] args) {
         loginOnWebsite(getProperty("login-email"), getProperty("login-password"));
-
-        List<String> linksToPlaneDetailsPage = new LinkedList<>();
-
         PlanesListPage planeList = new PlanesListPage();
-        int totalNumberOfPlaneListPages = countTotalPagesWithPlanes(planeList);
+        PlaneDetailsPage planeDetails = new PlaneDetailsPage();
+        open("https://tycoon.airlines-manager.com/aircraft");
+        int totalNumberOfPlaneListPages = planeList.getTotalPageNumberAndReturnToFirstPage();
+        List<String> linksToPlaneDetailsPage = new LinkedList<>();
+        //List<String> infoAboutPlane = new LinkedList<>();
+        List<List<String>> infoAboutPlane = new ArrayList<>();
+        gatherLinksToAllThePlanesDetails(planeList, totalNumberOfPlaneListPages, linksToPlaneDetailsPage);
+        gatherInfoAboutPlanes(planeDetails, linksToPlaneDetailsPage, infoAboutPlane);
+        //performCheckForPlane(linksToPlaneDetailsPage, planeDetails);
+
+
+
+    }
+
+    public static void performCheckForPlane(List<String> linksToPlaneDetailsPage, PlaneDetailsPage planeDetails){
+        for(String link : linksToPlaneDetailsPage){
+            open(link);
+            planeDetails.makeCheckDecision();
+        }
+    }
+
+    public static void gatherInfoAboutPlanes(PlaneDetailsPage planeDetails, List<String> linksToPlaneDetailsPage, List<List<String>> infoAboutPlane) {
+        for (String url : linksToPlaneDetailsPage) {
+            open(url);
+            planeDetails.getInfoAboutPlane(infoAboutPlane);
+        }
+    }
+
+    public static void gatherLinksToAllThePlanesDetails(PlanesListPage planeList, int totalNumberOfPlaneListPages, List<String> linksToPlaneDetailsPage) {
         for (int i = 1; i <= totalNumberOfPlaneListPages; i++) {
             planeList.getHrefsFromPlanesList(linksToPlaneDetailsPage);
             if (i >= 1 && i < totalNumberOfPlaneListPages) {
                 planeList.goToNextPage();
             }
         }
-
-
-
-    }
-
-    public static int countTotalPagesWithPlanes(PlanesListPage planeList) {
-        open("https://tycoon.airlines-manager.com/aircraft");
-        return planeList.getTotalPageNumberAndReturnToFirstPage();
     }
 
     public static void loginOnWebsite(String email, String password) {
