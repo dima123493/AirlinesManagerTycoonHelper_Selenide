@@ -125,7 +125,7 @@ class ManagePrices {
         for (int i = 0; i < pricePages.size(); i++) {
             int kilometerage = Integer.parseInt(kilometers.get(i));
             var row = fileInfo.get(i);
-            if (kilometerage < CRJ_1000_MAX_DISTANCE) {// TODO if ReadFromExcel...Class checks multiple planes - this "if" is useless
+            if (kilometerage <= CRJ_1000_MAX_DISTANCE) {// TODO if ReadFromExcel...Class checks multiple planes - this "if" is useless
                 open(pricePages.get(i));
                 String economyPrice = row.economyPriceValue();
                 String businessPrice = row.businessPriceValue();
@@ -186,24 +186,14 @@ class PlanesManagement {
         //List<String> infoAboutPlane = new LinkedList<>();
         List<List<String>> infoAboutPlane = new ArrayList<>();
         gatherLinksToAllThePlanesDetails(planeList, totalNumberOfPlaneListPages, linksToPlaneDetailsPage);
-        gatherInfoAboutPlanes(planeDetails, linksToPlaneDetailsPage, infoAboutPlane);
-        //performCheckForPlane(linksToPlaneDetailsPage, planeDetails);
-
-
-
+        gatherInfoAboutPlanesAndPerformCheck(planeDetails, linksToPlaneDetailsPage, infoAboutPlane);
     }
 
-    public static void performCheckForPlane(List<String> linksToPlaneDetailsPage, PlaneDetailsPage planeDetails){
-        for(String link : linksToPlaneDetailsPage){
-            open(link);
-            planeDetails.makeCheckDecision();
-        }
-    }
-
-    public static void gatherInfoAboutPlanes(PlaneDetailsPage planeDetails, List<String> linksToPlaneDetailsPage, List<List<String>> infoAboutPlane) {
+    public static void gatherInfoAboutPlanesAndPerformCheck(PlaneDetailsPage planeDetails, List<String> linksToPlaneDetailsPage, List<List<String>> infoAboutPlane) {
         for (String url : linksToPlaneDetailsPage) {
             open(url);
             planeDetails.getInfoAboutPlane(infoAboutPlane);
+            planeDetails.makeCheckDecision();
         }
     }
 
