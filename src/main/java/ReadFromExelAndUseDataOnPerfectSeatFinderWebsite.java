@@ -3,6 +3,9 @@ import filesManagment.ReadFile;
 import filesManagment.RecordFile;
 import pages.finderWebsite.PerfectSeatFinderPage;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,28 +13,43 @@ import static com.codeborne.selenide.Selenide.*;
 
 public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
     static final String URL = "https://destinations.noway.info/en/seatconfigurator/index.html"; //TODO
-     static final String sourceHubValue = "KBP"; //TODO
-     //String numberOfWavesNeeded;
+    static final String sourceHubValue = "KBP"; //TODO
+    static final String CRJ_1000_MANUFACTURER_NAME = "Bombardier"; //TODO
+    static final int CRJ_1000_MAX_DISTANCE = 3129; //TODO
+    static final String CRJ_1000_MODEL_NUMBER = "CRJ-1000 "; //TODO
+    static final String A300_600R_MANUFACTURER_NAME = "Airbus"; //TODO
+    static final int A300_600R_MAX_DISTANCE = 7540; //TODO
+    static final String A300_600R_MODEL_NUMBER = "A300-600R "; //TODO
+    //String numberOfWavesNeeded;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         ReadFile reader = new ReadFile();
         var dataFromExcel = reader.readFile();
         List<List<String>> dataFromPerfecrSeatFinderSite = new ArrayList<>();
+
+        var file2 = Path.of("D:\\AirlinesManager\\DistanceInKm.txt");
+        List<String> kilometers = Files.readAllLines(file2);
+
         for (var row : dataFromExcel) {
             //insertValuesFromExelOnThePerfecrSeatFinderWebsite(row);
 
-            Configuration.browserSize = "1920x1080";
-            open(URL);
+            int kilometerage = Integer.parseInt(kilometers.get(dataFromExcel.indexOf(row)));
 
+            Configuration.browserSize = "1920x1080";
+
+            open(URL);
+            zoom(0.3);
             PerfectSeatFinderPage perfectSeatFinderPage = new PerfectSeatFinderPage();
 
 /*            perfectSeatFinderPage.fillTheFieldsOnTheWebsite(sourceHubValue,row.destinationHubValue(),
                     row.economyDemandValue(),row.businessDemandValue(),row.firstDemandValue(),
                     row.cargoDemandValue(),row.economyPriceValue(),row.businessPriceValue(),
                     row.firstPriceValue(),row.cargoPriceValue());*/
-
-            perfectSeatFinderPage.fillTheFieldsOnTheWebsite(sourceHubValue,row);
-
+            if (kilometerage <= CRJ_1000_MAX_DISTANCE) {
+                perfectSeatFinderPage.fillTheFieldsOnTheWebsite(sourceHubValue, CRJ_1000_MANUFACTURER_NAME, CRJ_1000_MODEL_NUMBER, row);
+            } else if (kilometerage > CRJ_1000_MAX_DISTANCE && kilometerage <= A300_600R_MAX_DISTANCE) {
+                perfectSeatFinderPage.fillTheFieldsOnTheWebsite(sourceHubValue, A300_600R_MANUFACTURER_NAME,A300_600R_MODEL_NUMBER, row);
+            }
 
             dataFromPerfecrSeatFinderSite.add(perfectSeatFinderPage.collectDataFromPerfecrSeatFinderWebSite());
             clearBrowserCookies();
@@ -105,7 +123,7 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
 
 
 
-        */
+     */
 /*Configuration.browserSize = "1920x1080";
         open(URL);*//*
 
