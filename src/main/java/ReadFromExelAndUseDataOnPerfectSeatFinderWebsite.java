@@ -10,24 +10,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.codeborne.selenide.Selenide.*;
+import static propertyLoader.PerfectSeatFinderProperties.getProperty;
 
 public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
-    static final String URL = "https://destinations.noway.info/en/seatconfigurator/index.html"; //TODO
-    static final String sourceHubValue = "KBP"; //TODO
-    static final String CRJ_1000_MANUFACTURER_NAME = "Bombardier"; //TODO
-    static final int CRJ_1000_MAX_DISTANCE = 3129; //TODO
-    static final String CRJ_1000_MODEL_NUMBER = "CRJ-1000 "; //TODO
-    static final String A300_600R_MANUFACTURER_NAME = "Airbus"; //TODO
-    static final int A300_600R_MAX_DISTANCE = 7540; //TODO
-    static final String A300_600R_MODEL_NUMBER = "A300-600R "; //TODO
-    //String numberOfWavesNeeded;
+    static final String URL = getProperty("perfect-seat-finder-base-url");
+    static final String sourceHubValue = getProperty("hub-from-which-rote-starts");
+    static final String CRJ_1000_MANUFACTURER_NAME = "Bombardier";
+    static final int CRJ_1000_MAX_DISTANCE = 3129;
+    static final String CRJ_1000_MODEL_NUMBER = "CRJ-1000 ";
+    static final String A300_600R_MANUFACTURER_NAME = "Airbus";
+    static final int A300_600R_MAX_DISTANCE = 7540;
+    static final String A300_600R_MODEL_NUMBER = "A300-600R ";
 
     public static void main(String[] args) throws IOException {
         ReadFile reader = new ReadFile();
         var dataFromExcel = reader.readFile();
         List<List<String>> dataFromPerfecrSeatFinderSite = new ArrayList<>();
 
-        var file2 = Path.of("D:\\AirlinesManager\\DistanceInKm.txt");
+        var file2 = Path.of(getProperty("file-path-to-distance-for-each-route"));
         List<String> kilometers = Files.readAllLines(file2);
 
         for (var row : dataFromExcel) {
@@ -51,7 +51,7 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
                 perfectSeatFinderPage.fillTheFieldsOnTheWebsite(sourceHubValue, A300_600R_MANUFACTURER_NAME,A300_600R_MODEL_NUMBER, row);
             }
 
-            dataFromPerfecrSeatFinderSite.add(perfectSeatFinderPage.collectDataFromPerfecrSeatFinderWebSite());
+            dataFromPerfecrSeatFinderSite.add(PerfectSeatFinderPage.collectDataFromPerfecrSeatFinderWebSite());
             clearBrowserCookies();
         }
         RecordFile.writeInfoFromPerfecrSeatFinderWebsite(dataFromPerfecrSeatFinderSite);
