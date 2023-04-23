@@ -1,5 +1,6 @@
 package pages.finderWebsite;
 
+import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.ElementsCollection;
 import infoFromFiles.TableRow;
 import org.openqa.selenium.By;
@@ -12,9 +13,11 @@ public class PerfectSeatFinderPage {
     String iframe4 = "aswift_4";
     String closeAdd = "//div[@class='grippy-host']";
     String aircraftManufacturerFeld = "cf_aircraftmake";
-    String aircraftManufacturer = "//*[@id=\"cf_aircraftmake\"]/option[6]";//TODO Bombardier
+    //String aircraftManufacturer = "//*[@id=\"cf_aircraftmake\"]/option[6]";//DONE Bombardier
+    String aircraftManufacturer;
     String aircraftModelField = "cf_aircraftmodel";
-    String aircraftModel = "//*[@id=\"cf_aircraftmodel\"]/option[1]";//TODO CRJ-1000 (850 km/h)
+    // String aircraftModel = "//*[@id=\"cf_aircraftmodel\"]/option[1]";//DONE CRJ-1000 (850 km/h)
+    String aircraftModel;
     String changeTypeToInputForSourceHub = "//*[@id=\"nwy_airport_fullsearch\"]/table/tbody/tr[1]/td/a";
     final String sourceHub = "cf_hub_src";
     String changeTypeToInputForDestinationHub = "//*[@id=\"nwy_airport_dst_fullsearch\"]/table/tbody/tr[1]/td/a";
@@ -34,11 +37,20 @@ public class PerfectSeatFinderPage {
     String waveDropdown = "//select[@name='nwy_seatconfigurator_wave_1_selector']//option";
 
     static String numberOfWavesNeeded;
-    public void fillTheFieldsOnTheWebsite(String sourceHubValue, TableRow row){
+
+    public String aircraftManufacturerSelector(String manufacturerName) {
+        return aircraftManufacturer = "//*[@id=\"cf_aircraftmake\"]/option[text()=\"" + manufacturerName + "\"]";
+    }
+
+    public String aircraftModelSelector(String modelNumber) {
+        return aircraftModel = "//*[@id=\"cf_aircraftmodel\"]/option[contains(text(),\"" + modelNumber + "\")]";
+    }
+
+    public void fillTheFieldsOnTheWebsite(String sourceHubValue, String manufacturerName, String modelNumber, TableRow row) {
         $(By.id(aircraftManufacturerFeld)).click();
-        $x(aircraftManufacturer).click();
+        $x(aircraftManufacturerSelector(manufacturerName)).click();
         $(By.id(aircraftModelField)).click();
-        $x(aircraftModel).click();
+        $x(aircraftModelSelector(modelNumber)).click();
         $x(changeTypeToInputForSourceHub).click();
         $(By.id(sourceHub)).click();
         $(By.id(sourceHub)).setValue(sourceHubValue);
@@ -65,7 +77,7 @@ public class PerfectSeatFinderPage {
         $(By.id(addToCircuitButton)).click();
         $(By.id(avoidNegativeConfigurationsCheckBox)).click();
         $(By.id(calculateButton)).click();
-        $x(selectDropdown).click();
+        $x(selectDropdown).scrollTo().click();
         $x(selectDropdown).selectOption(lastElementValueInTheDropDown($$x(waveDropdown)));
     }
 
@@ -88,7 +100,7 @@ public class PerfectSeatFinderPage {
         String firstPrice = "//*[@id=\"nwy_seatconfigurator_wave_" + wavesNum + "_stats\"]/table[2]//tr[3]/td[4]";
         String crgPrice = "//*[@id=\"nwy_seatconfigurator_wave_" + wavesNum + "_stats\"]/table[2]//tr[3]/td[5]";
 
-        String ecoSeatResult = $x(ecoSeats).getText().trim().replaceAll("\\D+", "");
+        String ecoSeatResult = $x(ecoSeats).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", ""); // wait is added because after long run it always fails here
         String busSeatResult = $x(busSeats).getText().trim().replaceAll("\\D+", "");
         String fistSeatResult = $x(firstSeats).getText().trim().replaceAll("\\D+", "");
         String cargoSeatResult = $x(crgSeats).getText().trim().replaceAll("\\D+", "");
