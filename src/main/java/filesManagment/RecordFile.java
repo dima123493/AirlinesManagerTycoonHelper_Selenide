@@ -6,108 +6,42 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import static propertyLoader.AirlinesProperties.getProperty;
+
 public class RecordFile {
-
-/*    public static void main(String[] args) {
-        Map<String, String> nameOfAirportAndLink = new LinkedHashMap<>();
-        nameOfAirportAndLink.put("1", "https://tycoon.airlines-manager.com/marketing/pricing/62313174");
-        nameOfAirportAndLink.put("2", "https://tycoon.airlines-manager.com/marketing/pricing/57168817");
-        nameOfAirportAndLink.put("3", "p3");
-
-        for (String value : nameOfAirportAndLink.values()) {
-            writeLinksToPricePageForEachRoute(value);
-        }
-    }*/
-
     public void writeValuesForEachRoute(List<String> listOfKms, String fileName) {
         try {
-            Files.write(Path.of("D:\\" + fileName + ".txt"), listOfKms);
+            Files.write(Path.of("D:\\AirlinesManager\\" + fileName + ".txt"), listOfKms);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-/*        File file = new File("D:\\" + fileName + ".txt");
-        try {
-            if (file.createNewFile()) {
-                System.out.println("File created: " + file.getName());
-            }
-        } catch (IOException e) {
-            System.out.println("File can not be created!");
-            e.printStackTrace();
-        }
-
-        FileWriter myWriter = null;
-        try {
-           //List<String> lines = Files.readAllLines(file.toPath());
-            //boolean exist = true;
-            //while (!lines.contains(value) && exist) {
-                myWriter = new FileWriter(file,true);// ,true continues to write in the document
-                myWriter.write(System.lineSeparator());// adds new line
-                myWriter.write(listOfKms.toString());
-                System.out.println("Record was added to the file.");
-                myWriter.close();
-          //      exist = false;
-          //  }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }*/
-
     }
 
-    /*public static void writeValuesForEachRoute(int value, String fileName) {
-        File file = new File("D:\\" + fileName + ".txt");
-        try {
-            if (file.createNewFile()) {
-                System.out.println("File created: " + file.getName());
-            }
-        } catch (IOException e) {
-            System.out.println("File can not be created!");
-            e.printStackTrace();
-        }
-
-        FileWriter myWriter = null;
-        try {
-            //List<String> lines = Files.readAllLines(file.toPath());
-            //boolean exist = true;
-           // while (!lines.contains(value) && exist) {
-                myWriter = new FileWriter(file,true);// ,true continues to write in the document
-                myWriter.write(System.lineSeparator());// adds new line
-                myWriter.write(value);
-                System.out.println("Record was added to the file.");
-                myWriter.close();
-            //    exist = false;
-           // }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-    }*/
-
     public void writeInfoFromInfoPage(List<List<String>> rows) {
-        File xlsxFile = new File("D:\\Miracle.xlsx");
-        FileInputStream inputStream = null;
+        File xlsxFile = new File(getProperty("result-file-location")); //this file should be created in advance
+        FileInputStream inputStream;
         try {
             inputStream = new FileInputStream(xlsxFile);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        Workbook workbook = null;
+        Workbook workbook;
         try {
             workbook = WorkbookFactory.create(inputStream);
-            // XSSFWorkbook workbook = new XSSFWorkbook();
             Sheet spreadsheet = workbook.getSheet("InfoPage");
             if (spreadsheet == null) {
                 spreadsheet = workbook.createSheet("InfoPage");
             } else {
                 spreadsheet = workbook.getSheet("InfoPage");
             }
-
-            //XSSFWorkbook workbook = new XSSFWorkbook();
-            // XSSFSheet spreadsheet = workbook.createSheet("InfoPage");
 
             Row header = spreadsheet.createRow(0);
             header.createCell(0).setCellValue("Destination");
@@ -127,7 +61,7 @@ public class RecordFile {
                     row.createCell(j).setCellValue(rowData.get(j));
                 }
             }
-            try (var out = Files.newOutputStream(Path.of("D:\\Miracle.xlsx"))) {
+            try (var out = Files.newOutputStream(Path.of(getProperty("result-file-location")))) {
                 workbook.write(out);
             }
         } catch (IOException | EncryptedDocumentException e) {
@@ -135,15 +69,15 @@ public class RecordFile {
         }
     }
 
-    public static void writeInfoFromPerfecrSeatFinderWebsite(List<List<String>> rows) {
-        File xlsxFile = new File("D:\\Miracle.xlsx");
-        FileInputStream inputStream = null;
+    public static void writeInfoFromPerfectSeatFinderWebsite(List<List<String>> rows) {
+        File xlsxFile = new File(getProperty("result-file-location"));
+        FileInputStream inputStream;
         try {
             inputStream = new FileInputStream(xlsxFile);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        Workbook workbook = null;
+        Workbook workbook;
         try {
             workbook = WorkbookFactory.create(inputStream);
             Sheet spreadsheet = workbook.getSheet("ResultFromWebsite");
@@ -172,7 +106,7 @@ public class RecordFile {
                     row.createCell(j).setCellValue(rowData.get(j));
                 }
             }
-            try (var out = Files.newOutputStream(Path.of("D:\\Miracle.xlsx"))) {
+            try (var out = Files.newOutputStream(Path.of(getProperty("result-file-location")))) {
                 workbook.write(out);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);

@@ -15,10 +15,9 @@ public class AirlinesProperties {
                 .getResourceAsStream("airlinesManagerConfiguration.properties")) {
             props = new Properties();
             props.load(fis);
-            String airlinesWebsiteBaseURL = props.getProperty("airlines-manager-base-url");
-            System.out.println("=== airlinesWebsiteBaseURL = " + airlinesWebsiteBaseURL);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
 }

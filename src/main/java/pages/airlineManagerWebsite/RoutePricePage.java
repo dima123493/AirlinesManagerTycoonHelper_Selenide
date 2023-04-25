@@ -1,5 +1,6 @@
 package pages.airlineManagerWebsite;
 
+import com.codeborne.selenide.Condition;
 import org.openqa.selenium.By;
 
 import static com.codeborne.selenide.Selenide.$;
@@ -11,7 +12,7 @@ public class RoutePricePage {
     String reliabilityStateRU = "Очень ненадежный";
     String reliabilityStateEN = "Very unreliable";
     String amountOfMoneyInMyAccount = "ressource3";
-    String performAudit = "//*[@id=\"marketing_linePricing\"]/div[1]/a/span";//hover,click
+    String performAudit = "//*[@id=\"marketing_linePricing\"]/div[1]/a/span";
     String auditPrice = "//*[@id=\"popupContainer\"]/div[2]/p/span";
     String performAuditButton = "//div[@id='popupContainer']//span[@id='internalAuditButton']";
     String declineAuditButton = "//*[@id=\"popupContainer\"]/div[3]/span";
@@ -31,15 +32,17 @@ public class RoutePricePage {
     }
 
     public void applyNewPrices(String economyPrice, String businessPrice, String firstPrice, String crgPrice) {
-        $(By.id(economyClassPrice)).clear();
-        $(By.id(economyClassPrice)).setValue(economyPrice);
-        $(By.id(businessClassPrice)).clear();
-        $(By.id(businessClassPrice)).setValue(businessPrice);
-        $(By.id(firstClassPrice)).clear();
-        $(By.id(firstClassPrice)).setValue(firstPrice);
-        $(By.id(cargoPrice)).clear();
-        $(By.id(cargoPrice)).setValue(crgPrice);
-        $x(submitPricesButton).click();
+        if ($(By.id(economyClassPrice)).is(Condition.visible)) {
+            $(By.id(economyClassPrice)).clear();
+            $(By.id(economyClassPrice)).setValue(economyPrice);
+            $(By.id(businessClassPrice)).clear();
+            $(By.id(businessClassPrice)).setValue(businessPrice);
+            $(By.id(firstClassPrice)).clear();
+            $(By.id(firstClassPrice)).setValue(firstPrice);
+            $(By.id(cargoPrice)).clear();
+            $(By.id(cargoPrice)).setValue(crgPrice);
+            $x(submitPricesButton).click();
+        }
     }
 
     public void auditProcedure() {
@@ -47,7 +50,7 @@ public class RoutePricePage {
         long auditPriceValue;
         if ($x(reliability).getText().equals(reliabilityStateRU) ||
                 $x(reliability).getText().equals(reliabilityStateEN)) {
-            myAccountMoney = parseLong(($(By.id(amountOfMoneyInMyAccount)).getText().replaceAll("(?<=.)\\D+","")));
+            myAccountMoney = parseLong(($(By.id(amountOfMoneyInMyAccount)).getText().replaceAll("(?<=.)\\D+", "")));
             auditAnalysis();
             auditPriceValue = parseLong($x(auditPrice).getText().trim().replaceAll("\\D+", ""));
             if (auditPriceValue < myAccountMoney) {
@@ -57,18 +60,5 @@ public class RoutePricePage {
             }
         }
     }
-
-/*    public static void main(String[] args) {
-        long test1 = parseLong("-33,696,140,341".replaceAll("(?<=.)\\D+",""));
-        long test3 = parseLong("33,696,140,341".replaceAll("(?<=.)\\D+",""));
-        long test2 = parseLong("140,341".replaceAll("\\D+", ""));
-        System.out.println(test1);
-        System.out.println(test2);
-        if(test1>test2){
-            System.out.println("cool. audit can be performed");
-        }else{
-            System.out.println("not enough money");
-        }
-    }*/
 
 }

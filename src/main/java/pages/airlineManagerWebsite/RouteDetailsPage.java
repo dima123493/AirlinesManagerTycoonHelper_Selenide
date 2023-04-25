@@ -1,5 +1,8 @@
 package pages.airlineManagerWebsite;
 
+import com.codeborne.selenide.Condition;
+
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -23,37 +26,29 @@ public class RouteDetailsPage {
             String name = entry.getKey();
             open(entry.getValue());
 
-            //here page can be reloaded (should be checked)
-            RoutePricePage action = new RoutePricePage();
-            action.auditProcedure();
-            //here page can be reloaded (should be checked)
+            //You can uncomment this part if you want to perform an audit of specific route
+            // can be reloaded on audit. should be checked
 
-            String ecoDemand = $x(economyDemand).getText().trim().replaceAll("\\D+", "");
-            String businDemand = $x(businessDemand).getText().trim().replaceAll("\\D+", "");
-            String frtDemand = $x(firstDemand).getText().trim().replaceAll("\\D+", "");
-            String cargDemand = $x(cargoDemand).getText().trim().replaceAll("\\D+", "");
+            //RoutePricePage action = new RoutePricePage();
+            //action.auditProcedure();
 
-            String ecoPrice = $x(economyPrice).getText().trim().replaceAll("\\D+", "");
-            String businPrice = $x(businessPrice).getText().trim().replaceAll("\\D+", "");
-            String frtPrice = $x(firstPrice).getText().trim().replaceAll("\\D+", "");
-            String cargPrice = $x(cargoPrice).getText().trim().replaceAll("\\D+", "");
+            String ecoDemand = $x(economyDemand).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
+            String businDemand = $x(businessDemand).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
+            String frtDemand = $x(firstDemand).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
+            String cargDemand = $x(cargoDemand).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
 
-/*            String newEcoDemand = ecoDemand.replaceAll("\\D+", "");
-            String newBusinDemand = businDemand.replaceAll("\\D+", "");
-            String newFrtDemand = frtDemand.replaceAll("\\D+", "");
-            String newCargDemand = cargDemand.replaceAll("\\D+", "");
-            String newEcoPrice = ecoPrice.replaceAll("\\D+", "");
-            String newbusinPrice = businPrice.replaceAll("\\D+", "");
-            String newFrtPrice = frtPrice.replaceAll("\\D+", "");
-            String newCargPrice = cargPrice.replaceAll("\\D+", "");*/
+            String ecoPrice = $x(economyPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
+            String businPrice = $x(businessPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
+            String frtPrice = $x(firstPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
+            String cargPrice = $x(cargoPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
 
             rows.add(List.of(name, ecoDemand, businDemand, frtDemand, cargDemand, ecoPrice, businPrice, frtPrice, cargPrice));
         }
     }
 
-    public void collectAirPotNamesAndLinks(Map<String, String> nameOfAirportAndLink) {
-        String portName = $x(airportName).getText().trim().toUpperCase().substring(0, 3);
-        String link = $x(linkToPricesPage).getAttribute("href");
+    public void collectAirprotNamesAndLinksToRoutePrice(Map<String, String> nameOfAirportAndLink) {
+        String portName = $x(airportName).shouldBe(Condition.visible).getText().trim().toUpperCase().substring(0, 3);
+        String link = $x(linkToPricesPage).shouldBe(Condition.visible, Duration.ofSeconds(30)).getAttribute("href");
         nameOfAirportAndLink.put(portName, link);
     }
 }

@@ -2,7 +2,7 @@ package pages.finderWebsite;
 
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.ElementsCollection;
-import infoFromFiles.TableRow;
+import infoFromFiles.GatheredInfoTableRow;
 import org.openqa.selenium.By;
 
 import java.util.List;
@@ -10,13 +10,9 @@ import java.util.List;
 import static com.codeborne.selenide.Selenide.*;
 
 public class PerfectSeatFinderPage {
-    String iframe4 = "aswift_4";
-    String closeAdd = "//div[@class='grippy-host']";
-    String aircraftManufacturerFeld = "cf_aircraftmake";
-    //String aircraftManufacturer = "//*[@id=\"cf_aircraftmake\"]/option[6]";//DONE Bombardier
+    String aircraftManufacturerField = "cf_aircraftmake";
     String aircraftManufacturer;
     String aircraftModelField = "cf_aircraftmodel";
-    // String aircraftModel = "//*[@id=\"cf_aircraftmodel\"]/option[1]";//DONE CRJ-1000 (850 km/h)
     String aircraftModel;
     String changeTypeToInputForSourceHub = "//*[@id=\"nwy_airport_fullsearch\"]/table/tbody/tr[1]/td/a";
     final String sourceHub = "cf_hub_src";
@@ -46,15 +42,14 @@ public class PerfectSeatFinderPage {
         return aircraftModel = "//*[@id=\"cf_aircraftmodel\"]/option[contains(text(),\"" + modelNumber + "\")]";
     }
 
-    public void fillTheFieldsOnTheWebsite(String sourceHubValue, String manufacturerName, String modelNumber, TableRow row) {
-        $(By.id(aircraftManufacturerFeld)).click();
+    public void fillTheFieldsOnTheWebsite(String sourceHubValue, String manufacturerName, String modelNumber, GatheredInfoTableRow row) {
+        $(By.id(aircraftManufacturerField)).click();
         $x(aircraftManufacturerSelector(manufacturerName)).click();
         $(By.id(aircraftModelField)).click();
         $x(aircraftModelSelector(modelNumber)).click();
         $x(changeTypeToInputForSourceHub).click();
         $(By.id(sourceHub)).click();
         $(By.id(sourceHub)).setValue(sourceHubValue);
-        //actions().moveToElement($x(closeAdd).shouldBe(Condition.appear)).click().perform();
         $x(changeTypeToInputForDestinationHub).click();
         $(By.id(destinationHub)).click();
         $(By.id(destinationHub)).setValue(row.destinationHubValue());
@@ -86,7 +81,7 @@ public class PerfectSeatFinderPage {
         return numberOfWavesNeeded;
     }
 
-    public static List<String> collectDataFromPerfecrSeatFinderWebSite() {
+    public static List<String> collectDataFromPerfectSeatFinderWebSite() {
         String wavesNum = numberOfWavesNeeded;
 
         String ecoSeats = "//*[@id=\"nwy_seatconfigurator_wave_" + wavesNum + "_stats\"]/table[1]/tbody/tr[3]/td[2]";
@@ -100,15 +95,15 @@ public class PerfectSeatFinderPage {
         String firstPrice = "//*[@id=\"nwy_seatconfigurator_wave_" + wavesNum + "_stats\"]/table[2]//tr[3]/td[4]";
         String crgPrice = "//*[@id=\"nwy_seatconfigurator_wave_" + wavesNum + "_stats\"]/table[2]//tr[3]/td[5]";
 
-        String ecoSeatResult = $x(ecoSeats).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", ""); // wait is added because after long run it always fails here
-        String busSeatResult = $x(busSeats).getText().trim().replaceAll("\\D+", "");
-        String fistSeatResult = $x(firstSeats).getText().trim().replaceAll("\\D+", "");
-        String cargoSeatResult = $x(crgSeats).getText().trim().replaceAll("\\D+", "");
-        String aitaCodeResult = $x(aitaCode).getText().trim();
-        String ecoPriceResult = $x(ecoPrice).getText().trim().replaceAll("\\D+", "");
-        String busPriceResult = $x(busPrice).getText().trim().replaceAll("\\D+", "");
-        String firstPriceResult = $x(firstPrice).getText().trim().replaceAll("\\D+", "");
-        String cargoPriceResult = $x(crgPrice).getText().trim().replaceAll("\\D+", "");
+        String ecoSeatResult = $x(ecoSeats).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
+        String busSeatResult = $x(busSeats).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
+        String fistSeatResult = $x(firstSeats).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
+        String cargoSeatResult = $x(crgSeats).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
+        String aitaCodeResult = $x(aitaCode).shouldBe(Condition.visible).getText().trim();
+        String ecoPriceResult = $x(ecoPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
+        String busPriceResult = $x(busPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
+        String firstPriceResult = $x(firstPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
+        String cargoPriceResult = $x(crgPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
 
         return List.of(wavesNum, aitaCodeResult, ecoSeatResult, busSeatResult, fistSeatResult, cargoSeatResult, ecoPriceResult, busPriceResult, firstPriceResult, cargoPriceResult);
     }

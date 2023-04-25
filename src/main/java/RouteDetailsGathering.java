@@ -12,11 +12,6 @@ import static com.codeborne.selenide.Selenide.closeWebDriver;
 import static com.codeborne.selenide.Selenide.open;
 import static propertyLoader.AirlinesProperties.getProperty;
 
-/*record AeroportToPriceRef (
-    String aeroportName,
-    String hrefToPrice
-){}*/
-
 public class RouteDetailsGathering {
     public static final String URL = getProperty("airlines-manager-base-url");
 
@@ -45,20 +40,10 @@ public class RouteDetailsGathering {
         List<List<String>> rows = new ArrayList<>();
 
         RouteDetailsPage routePage = new RouteDetailsPage();
-        // List<AeroportToPriceRef> keyvals = new ArrayList<>();
         for (String href : routeInfoHrefs) {
             open(href);
             routePage.collectAirprotNamesAndLinksToRoutePrice(nameOfAirportAndLinkToRoutePrices);
-            //SelenideElement link = $x("//*[@id=\"showLine\"]/div[5]/div/a");
-
-            //String key = $x(airportName).getText().trim().toUpperCase().substring(0, 3);
-            // String value = $x(linkToPricesPage).getAttribute("href");
-            // keyvals.add(new AeroportToPriceRef(key, value));
-            //nameOfAirportAndLinkToRoutePrices.put(key, value);
         }
-        //System.out.println("==========");
-        // System.out.println(keyvals);
-        //  System.out.println("==========");
 
         System.out.println(nameOfAirportAndLinkToRoutePrices);
         System.out.println(nameOfAirportAndLinkToRoutePrices.size());
@@ -68,32 +53,6 @@ public class RouteDetailsGathering {
         System.out.println(linksToPricePage);
 
         routePage.collectDemandValueAndPrices(nameOfAirportAndLinkToRoutePrices, rows);
-/*        for (Map.Entry<String, String> entry : nameOfAirportAndLinkToRoutePrices.entrySet()) {
-            String name = entry.getKey();
-            open(entry.getValue());
-
-            String ecoDemand = $x(economyDemand).getText().trim();
-            String businDemand = $x(businessDemand).getText().trim();
-            String frtDemand = $x(firstDemand).getText().trim();
-            String cargDemand = $x(cargoDemand).getText().trim();
-
-            String ecoPrice = $x(economyPrice).getText().trim();
-            String businPrice = $x(businessPrice).getText().trim();
-            String frtPrice = $x(firstPrice).getText().trim();
-            String cargPrice = $x(cargoPrice).getText().trim();
-
-            String newEcoDemand = ecoDemand.replaceAll("\\D+", "");
-            String newBusinDemand = businDemand.replaceAll("\\D+", "");
-            String newFrtDemand = frtDemand.replaceAll("\\D+", "");
-            String newCargDemand = cargDemand.replaceAll("\\D+", "");
-            String newEcoPrice = ecoPrice.replaceAll("\\D+", "");
-            String newbusinPrice = businPrice.replaceAll("\\D+", "");
-            String newFrtPrice = frtPrice.replaceAll("\\D+", "");
-            String newCargPrice = cargPrice.replaceAll("\\D+", "");
-
-            rows.add(List.of(name, newEcoDemand, newBusinDemand, newFrtDemand, newCargDemand, newEcoPrice, newbusinPrice, newFrtPrice, newCargPrice));
-
-        }*/
         info.writeInfoFromInfoPage(rows);
         closeWebDriver();
     }
@@ -126,26 +85,13 @@ class ManageRoutePrices {
 
         for (int i = 0; i < pricePages.size(); i++) {
             var row = gatheredInfoFile.get(i);
-                open(pricePages.get(i));
-                String economyPrice = row.economyPriceForRoute();
-                String businessPrice = row.businessPriceForRoute();
-                String firstPrice = row.firstPriceForRoute();
-                String cargoPrice = row.cargoPriceForRoute();
-                managePricesForRoute(economyPrice, businessPrice, firstPrice, cargoPrice);
+            open(pricePages.get(i));
+            String economyPrice = row.economyPriceForRoute();
+            String businessPrice = row.businessPriceForRoute();
+            String firstPrice = row.firstPriceForRoute();
+            String cargoPrice = row.cargoPriceForRoute();
+            managePricesForRoute(economyPrice, businessPrice, firstPrice, cargoPrice);
         }
-
-//        var resultMap = combineTwoListsIntoHashMap(pricePages, kilometers);
-//        for (Map.Entry<String, Integer> entry : resultMap.entrySet()) {
-//            if (entry.getValue() <= crj1000MaxDistance) {
-//                open(entry.getKey());
-//                fileInfo.stream()
-//                        .filter(row -> row.km().contentEquals())
-//
-//               if(fileInfo.contains(entry.getValue())){
-//                   managePricesForRoute();
-//               }
-//            }
-//        }
 
     }
 
@@ -164,15 +110,7 @@ class ManageRoutePrices {
         }
     }
 
-/*    public static Map<String, Integer> combineTwoListsIntoHashMap(List<String> pricePages, List<String> kilometers) {
-        Map<String, Integer> resultMap = new LinkedHashMap<>();
-        for (int i = 0; i < pricePages.size(); i++) {
-            resultMap.put(pricePages.get(i), Integer.valueOf(kilometers.get(i)));
-        }
-        return resultMap;
-    }*/
 }
-
 
 
 class PlanesManagement {
@@ -183,7 +121,6 @@ class PlanesManagement {
         open("https://tycoon.airlines-manager.com/aircraft");
         int totalNumberOfPlaneListPages = planeList.getTotalPageNumberAndReturnToFirstPage();
         List<String> linksToPlaneDetailsPage = new LinkedList<>();
-        //List<String> infoAboutPlane = new LinkedList<>();
         List<List<String>> infoAboutPlane = new ArrayList<>();
         gatherLinksToAllThePlanesDetails(planeList, totalNumberOfPlaneListPages, linksToPlaneDetailsPage);
         gatherInfoAboutPlanesAndPerformCheck(planeDetails, linksToPlaneDetailsPage, infoAboutPlane);
@@ -215,4 +152,5 @@ class PlanesManagement {
             System.out.println("Email or password is incorrect!");
         }
     }
+
 }

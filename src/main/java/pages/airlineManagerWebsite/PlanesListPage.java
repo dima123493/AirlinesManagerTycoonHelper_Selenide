@@ -4,6 +4,7 @@ import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.codeborne.selenide.Selenide.*;
 import static java.lang.Integer.parseInt;
@@ -16,21 +17,22 @@ public class PlanesListPage {
 
     public int getTotalPageNumberAndReturnToFirstPage() {
         String lastPageLink = $x(goLastPage).getAttribute("href");
-        open(lastPageLink);
+        open(Objects.requireNonNull(lastPageLink));
         int totalPageNumberCount = parseInt($x(getPageNumber).getText());
         String firstPageLink = $x(goFirstPage).getAttribute("href");
-        open(firstPageLink);
+        open(Objects.requireNonNull(firstPageLink));
 
         return totalPageNumberCount;
     }
 
     public void goToNextPage() {
         String goNextPage = $x(getNextPage).getAttribute("href");
-        open(goNextPage);
+        open(Objects.requireNonNull(goNextPage));
     }
 
     public void getHrefsFromPlanesList(List<String> links) {
-        ElementsCollection linksArray = $$x("//*[@id=\"aircraft_dashboard\"]//div[5]//a");
+        String listOfHrefsToPlaneDetailesPage = "//*[@id=\"aircraft_dashboard\"]//div[5]//a";
+        ElementsCollection linksArray = $$x(listOfHrefsToPlaneDetailesPage);
         for (SelenideElement selenideElement : linksArray) {
             links.add(selenideElement.getAttribute("href"));
         }

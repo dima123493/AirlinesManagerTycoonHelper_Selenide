@@ -6,27 +6,13 @@ import org.openqa.selenium.By;
 
 import java.util.List;
 
-import static com.codeborne.selenide.Selenide.*;
+import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.$$x;
 
 public class RouteListPage {
     String sortByRoutLength = "//input[@value='distanceMinus']";
 
     String distance = "//*[@id=\"lineList\"]//ul/li[1]/b";
-
-/*
-    String getLastPage = "//a[normalize-space()='>>']";
-    String getPageNumber = "//span[@class='current']";
-    String getFirstPage = "//a[normalize-space()='<<']";
-
-        public int getTotalPageNumberAndReturnToFirstPage() {
-        String lastPageLink = $x(getLastPage).getAttribute("href");
-        open(lastPageLink);
-        int totalPageNumberCount = parseInt($x(getPageNumber).getText());
-        String firstPageLink = $x(getFirstPage).getAttribute("href");
-        open(firstPageLink);
-
-        return totalPageNumberCount;
-    }*/
 
     public void sortByRoutLength() {
         $(By.xpath(sortByRoutLength)).click();
