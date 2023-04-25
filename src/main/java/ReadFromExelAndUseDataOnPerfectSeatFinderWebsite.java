@@ -24,7 +24,7 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
 
     public static void main(String[] args) throws IOException {
         ReadFile reader = new ReadFile();
-        var dataFromExcel = reader.readFile();
+        var dataFromExcel = reader.readGatheredInfoFile();
         List<List<String>> dataFromPerfecrSeatFinderSite = new ArrayList<>();
 
         var file2 = Path.of(getProperty("file-path-to-distance-for-each-route"));
@@ -38,7 +38,7 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
             Configuration.browserSize = "1920x1080";
 
             open(URL);
-            zoom(0.3);
+            zoom(0.5);
             PerfectSeatFinderPage perfectSeatFinderPage = new PerfectSeatFinderPage();
 
 /*            perfectSeatFinderPage.fillTheFieldsOnTheWebsite(sourceHubValue,row.destinationHubValue(),
@@ -47,19 +47,20 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
                     row.firstPriceValue(),row.cargoPriceValue());*/
             if (kilometerage <= CRJ_1000_MAX_DISTANCE) {
                 perfectSeatFinderPage.fillTheFieldsOnTheWebsite(sourceHubValue, CRJ_1000_MANUFACTURER_NAME, CRJ_1000_MODEL_NUMBER, row);
-            } else if (kilometerage > CRJ_1000_MAX_DISTANCE && kilometerage <= A300_600R_MAX_DISTANCE) {
+            } else {
                 perfectSeatFinderPage.fillTheFieldsOnTheWebsite(sourceHubValue, A300_600R_MANUFACTURER_NAME,A300_600R_MODEL_NUMBER, row);
             }
 
             dataFromPerfecrSeatFinderSite.add(PerfectSeatFinderPage.collectDataFromPerfecrSeatFinderWebSite());
             clearBrowserCookies();
+            refresh();
         }
         RecordFile.writeInfoFromPerfecrSeatFinderWebsite(dataFromPerfecrSeatFinderSite);
         closeWebDriver();
     }
 
-   /* public static List<infoFromFiles.TableRow> readFile() {
-        List<infoFromFiles.TableRow> dataFromExcel = new ArrayList<>();
+   /* public static List<infoFromFiles.GatheredInfoTableRow> readFile() {
+        List<infoFromFiles.GatheredInfoTableRow> dataFromExcel = new ArrayList<>();
 
         try (OPCPackage pkg = OPCPackage.open(Path.of("D:\\Miracle.xlsx").toFile());
              XSSFWorkbook workbook = new XSSFWorkbook(pkg);
@@ -76,7 +77,7 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
                 var firstPriceValue = sheet.getRow(i).getCell(7).getStringCellValue();
                 var cargoPriceValue = sheet.getRow(i).getCell(8).getStringCellValue();
                 var km = sheet.getRow(i).getCell(9).getStringCellValue();
-                dataFromExcel.add(new infoFromFiles.TableRow(destinationHubValue,
+                dataFromExcel.add(new infoFromFiles.GatheredInfoTableRow(destinationHubValue,
                         economyDemandValue,
                         businessDemandValue,
                         firstDemandValue,
@@ -95,7 +96,7 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
 
 
 /*
-    public static void insertValuesFromExelOnThePerfecrSeatFinderWebsite(infoFromFiles.TableRow row) {
+    public static void insertValuesFromExelOnThePerfecrSeatFinderWebsite(infoFromFiles.GatheredInfoTableRow row) {
 */
 /*        String iframe4 = "aswift_4";
         String closeAdd = "//div[@class='grippy-host']";

@@ -1,6 +1,6 @@
 import filesManagment.ReadFile;
 import filesManagment.RecordFile;
-import infoFromFiles.TableRow;
+import infoFromFiles.ReadGatheredResultFromPerfectSeatWebsiteFile;
 import pages.airlineManagerWebsite.*;
 
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class RouteDetailsGathering {
 
         info.writeValuesForEachRoute(listOfKms, getProperty("file-name-for-gathered-distance"));
 
-        Map<String, String> nameOfAirportAndLink = new LinkedHashMap<>();
+        Map<String, String> nameOfAirportAndLinkToRoutePrices = new LinkedHashMap<>();
 
         List<List<String>> rows = new ArrayList<>();
 
@@ -48,24 +48,27 @@ public class RouteDetailsGathering {
         // List<AeroportToPriceRef> keyvals = new ArrayList<>();
         for (String href : routeInfoHrefs) {
             open(href);
-            routePage.collectAirPotNamesAndLinks(nameOfAirportAndLink);
+            routePage.collectAirprotNamesAndLinksToRoutePrice(nameOfAirportAndLinkToRoutePrices);
             //SelenideElement link = $x("//*[@id=\"showLine\"]/div[5]/div/a");
 
             //String key = $x(airportName).getText().trim().toUpperCase().substring(0, 3);
             // String value = $x(linkToPricesPage).getAttribute("href");
             // keyvals.add(new AeroportToPriceRef(key, value));
-            //nameOfAirportAndLink.put(key, value);
+            //nameOfAirportAndLinkToRoutePrices.put(key, value);
         }
         //System.out.println("==========");
         // System.out.println(keyvals);
         //  System.out.println("==========");
 
-        List<String> linksToPricePage = new ArrayList<>(nameOfAirportAndLink.values());
+        System.out.println(nameOfAirportAndLinkToRoutePrices);
+        System.out.println(nameOfAirportAndLinkToRoutePrices.size());
+
+        List<String> linksToPricePage = new ArrayList<>(nameOfAirportAndLinkToRoutePrices.values());
         info.writeValuesForEachRoute(linksToPricePage, getProperty("file-name-for-gathered-links-to-price-page"));
         System.out.println(linksToPricePage);
 
-        routePage.collectDemandValueAndPrices(nameOfAirportAndLink, rows);
-/*        for (Map.Entry<String, String> entry : nameOfAirportAndLink.entrySet()) {
+        routePage.collectDemandValueAndPrices(nameOfAirportAndLinkToRoutePrices, rows);
+/*        for (Map.Entry<String, String> entry : nameOfAirportAndLinkToRoutePrices.entrySet()) {
             String name = entry.getKey();
             open(entry.getValue());
 
@@ -107,33 +110,28 @@ public class RouteDetailsGathering {
 
 }
 
-class ManagePrices {
-    static final int CRJ_1000_MAX_DISTANCE = 3129;//TODO change this!!!
+class ManageRoutePrices {
 
     public static void main(String[] args) throws IOException {
-        var file1 = Path.of("D:\\AirlinesManager\\LinksToPricePageForEachRoute.txt");
-        var file2 = Path.of("D:\\AirlinesManager\\DistanceInKm.txt");
+        var file1 = Path.of(getProperty("file-path-for-gathered-links-to-price-page"));
+        var file2 = Path.of("file-path-for-gathered-distance");
         List<String> pricePages = Files.readAllLines(file1);
         List<String> kilometers = Files.readAllLines(file2);
-        List<TableRow> fileInfo = ReadFile.readFile();
-        if (!(pricePages.size() == kilometers.size() && kilometers.size() == fileInfo.size())) {
+        List<ReadGatheredResultFromPerfectSeatWebsiteFile> gatheredInfoFile = ReadFile.readGatheredResultFromPerfectSeatWebsiteFile();
+        if (!(pricePages.size() == kilometers.size() && kilometers.size() == gatheredInfoFile.size())) {
             throw new IllegalStateException("Number of rows in files do not match");
         }
         loginOnWebsite(getProperty("login-email"), getProperty("login-password"));
 
 
         for (int i = 0; i < pricePages.size(); i++) {
-            int kilometerage = Integer.parseInt(kilometers.get(i));
-            var row = fileInfo.get(i);
-            if (kilometerage <= CRJ_1000_MAX_DISTANCE) {// TODO if ReadFromExcel...Class checks multiple planes - this "if" is useless
+            var row = gatheredInfoFile.get(i);
                 open(pricePages.get(i));
-                String economyPrice = row.economyPriceValue();
-                String businessPrice = row.businessPriceValue();
-                String firstPrice = row.firstPriceValue();
-                String cargoPrice = row.cargoPriceValue();
+                String economyPrice = row.economyPriceForRoute();
+                String businessPrice = row.businessPriceForRoute();
+                String firstPrice = row.firstPriceForRoute();
+                String cargoPrice = row.cargoPriceForRoute();
                 managePricesForRoute(economyPrice, businessPrice, firstPrice, cargoPrice);
-            }
-
         }
 
 //        var resultMap = combineTwoListsIntoHashMap(pricePages, kilometers);
@@ -175,6 +173,8 @@ class ManagePrices {
     }*/
 }
 
+
+
 class PlanesManagement {
     public static void main(String[] args) {
         loginOnWebsite(getProperty("login-email"), getProperty("login-password"));
@@ -215,5 +215,4 @@ class PlanesManagement {
             System.out.println("Email or password is incorrect!");
         }
     }
-
 }
