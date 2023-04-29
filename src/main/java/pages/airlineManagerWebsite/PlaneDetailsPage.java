@@ -18,16 +18,25 @@ public class PlaneDetailsPage {
 
     String configurationLink = "//*[@id=\"subMenu\"]/a[3]";
 
-    public void getInfoAboutPlane(List<List<String>> infoAboutPlane) {
+    public String getConfigurationLink() {
+        return $x(configurationLink).getAttribute("href");
+    }
+
+    public String getAircraftName() {
         String collectedAircraftName = $x(aircraftName).getText();
-        String formattedAircraftName = StringUtils.substringBefore(collectedAircraftName, "/").trim();
+        return StringUtils.substringBefore(collectedAircraftName, "/").trim();
+    }
+
+    public void getInfoAboutPlane(List<List<String>> infoAboutPlane) {
+        String formattedAircraftName = getAircraftName();
 
         String collectedAircraftCategory = Objects.requireNonNull($x(aircraftCategory).getAttribute("alt")).trim().replaceAll("\\D+", "");
 
         String collectedAircraftDeterioration = $x(aircraftDeterioration).getText();
         String formattedAircraftDeterioration = StringUtils.substringBefore(collectedAircraftDeterioration, "%").trim();
 
-        String linkToPlaneConfigurationPage = $x(configurationLink).getAttribute("href");
+        String linkToPlaneConfigurationPage = getConfigurationLink();
+        //String linkToPlaneConfigurationPage = $x(configurationLink).getAttribute("href");
 
         infoAboutPlane.add(List.of(formattedAircraftName, collectedAircraftCategory, formattedAircraftDeterioration, Objects.requireNonNull(linkToPlaneConfigurationPage)));
     }

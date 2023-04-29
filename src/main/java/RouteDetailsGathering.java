@@ -116,20 +116,46 @@ class ManageRoutePrices {
 class PlanesManagement {
     public static void main(String[] args) {
         loginOnWebsite(getProperty("login-email"), getProperty("login-password"));
-        PlanesListPage planeList = new PlanesListPage();
+
+        SchedulePage planesOmTheRoute = new SchedulePage();
         PlaneDetailsPage planeDetails = new PlaneDetailsPage();
+        open("https://tycoon.airlines-manager.com/network/generalplanning/1");
+        List<List<String>> collectedOnRoutePlanesData = new ArrayList<>();
+        planesOmTheRoute.collectInfoAboutPlanesAndWavesOnTheRoute(collectedOnRoutePlanesData);
+
+        //this part reconfigures planes which are already on the route
+        List<ReadGatheredResultFromPerfectSeatWebsiteFile> gatheredInfoFile = ReadFile.readGatheredResultFromPerfectSeatWebsiteFile();
+        for( List<String> record : collectedOnRoutePlanesData){
+            open("https://tycoon.airlines-manager.com/aircraft/show/" + record.get(2));// record.get(2) - gets aircraft id
+
+            //find by name and extract data from that row
+            for(ReadGatheredResultFromPerfectSeatWebsiteFile rowValues : gatheredInfoFile) {
+                if (rowValues.airportName().contains(planeDetails.getAircraftName())) {
+                    open(planeDetails.getConfigurationLink());
+                    String economySeats = rowValues.economySeatsAmountNeeded();
+                    String businessSeats = rowValues.businessSeatsAmountNeeded();
+                    String firstSeats = rowValues.firstSeatsAmountNeeded();
+                    String cargoSeats = rowValues.cargoSeatsAmountNeeded();
+
+                    //create page and method to configure plane
+                }
+            }
+        }
+
+        //VALID CODE
+/*        PlanesListPage planeList = new PlanesListPage();
         open("https://tycoon.airlines-manager.com/aircraft");
         int totalNumberOfPlaneListPages = planeList.getTotalPageNumberAndReturnToFirstPage();
         List<String> linksToPlaneDetailsPage = new LinkedList<>();
-        List<List<String>> infoAboutPlane = new ArrayList<>();
+        List<List<String>> infoAboutPlane = new ArrayList<>();//can be performed in PlaneDetailsPage getInfoAboutPlane() method
         gatherLinksToAllThePlanesDetails(planeList, totalNumberOfPlaneListPages, linksToPlaneDetailsPage);
-        gatherInfoAboutPlanesAndPerformCheck(planeDetails, linksToPlaneDetailsPage, infoAboutPlane);
+        performCheck(planeDetails, linksToPlaneDetailsPage);*/
     }
 
-    public static void gatherInfoAboutPlanesAndPerformCheck(PlaneDetailsPage planeDetails, List<String> linksToPlaneDetailsPage, List<List<String>> infoAboutPlane) {
+    public static void performCheck(PlaneDetailsPage planeDetails, List<String> linksToPlaneDetailsPage) {
         for (String url : linksToPlaneDetailsPage) {
             open(url);
-            planeDetails.getInfoAboutPlane(infoAboutPlane);
+            //planeDetails.getInfoAboutPlane(infoAboutPlane);
             planeDetails.makeCheckDecision();
         }
     }
