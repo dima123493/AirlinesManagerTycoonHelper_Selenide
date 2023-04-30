@@ -68,7 +68,7 @@ public class PerfectSeatFinderPage {
         $(By.id(firstPrice)).click();
         $(By.id(firstPrice)).setValue(row.firstPriceValue());
         $(By.id(cargoPrice)).click();
-        $(By.id(cargoPrice)).setValue(row.economyPriceValue());
+        $(By.id(cargoPrice)).setValue(row.cargoPriceValue());
         $(By.id(addToCircuitButton)).click();
         $(By.id(avoidNegativeConfigurationsCheckBox)).click();
         $(By.id(calculateButton)).click();
