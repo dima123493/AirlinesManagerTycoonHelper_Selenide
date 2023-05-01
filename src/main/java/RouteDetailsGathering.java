@@ -8,8 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import static com.codeborne.selenide.Selenide.closeWebDriver;
-import static com.codeborne.selenide.Selenide.open;
+import static com.codeborne.selenide.Selenide.*;
+import static java.lang.Integer.parseInt;
 import static propertyLoader.AirlinesProperties.getProperty;
 
 public class RouteDetailsGathering {
@@ -119,28 +119,46 @@ class PlanesManagement {
 
         SchedulePage planesOmTheRoute = new SchedulePage();
         PlaneDetailsPage planeDetails = new PlaneDetailsPage();
+        PlaneConfigurationPage planeConfiguration = new PlaneConfigurationPage();
+        boolean reconfiguration;
         open("https://tycoon.airlines-manager.com/network/generalplanning/1");
         List<List<String>> collectedOnRoutePlanesData = new ArrayList<>();
         planesOmTheRoute.collectInfoAboutPlanesAndWavesOnTheRoute(collectedOnRoutePlanesData);
 
-        //this part reconfigures planes which are already on the route
+        //this part reconfigures planes which are already on the route using data from Excel
         List<ReadGatheredResultFromPerfectSeatWebsiteFile> gatheredInfoFile = ReadFile.readGatheredResultFromPerfectSeatWebsiteFile();
         for( List<String> record : collectedOnRoutePlanesData){
             open("https://tycoon.airlines-manager.com/aircraft/show/" + record.get(2));// record.get(2) - gets aircraft id
 
             //find by name and extract data from that row
             for(ReadGatheredResultFromPerfectSeatWebsiteFile rowValues : gatheredInfoFile) {
-                if (rowValues.airportName().contains(planeDetails.getAircraftName())) {
-                    open(planeDetails.getConfigurationLink());
-                    String economySeats = rowValues.economySeatsAmountNeeded();
-                    String businessSeats = rowValues.businessSeatsAmountNeeded();
-                    String firstSeats = rowValues.firstSeatsAmountNeeded();
-                    String cargoSeats = rowValues.cargoSeatsAmountNeeded();
-
-                    //create page and method to configure plane
+                    if (planeDetails.getAircraftName().contains(rowValues.airportName())) {
+                        open(planeDetails.getConfigurationLink());
+                        String economySeats = rowValues.economySeatsAmountNeeded();
+                        String businessSeats = rowValues.businessSeatsAmountNeeded();
+                        String firstSeats = rowValues.firstSeatsAmountNeeded();
+                        String cargoSeats = rowValues.cargoSeatsAmountNeeded();
+                        reconfiguration = planeConfiguration.configureAircraftSeats(economySeats, businessSeats, firstSeats, cargoSeats);
+                        //TODO change amount of waves needed in the exel file on the amount of waves the plane does
+                        if (reconfiguration == false) {//TODO should be TRUE
+                           int result = parseInt(rowValues.numberOfWavesNeeded()) - parseInt(record.get(3));
+                            gatheredInfoFile.set(parseInt(rowValues.numberOfWavesNeeded()),
+                                    new ReadGatheredResultFromPerfectSeatWebsiteFile(
+                                            String.valueOf(result),// if number is negative you have to delete that amount of routes - 1
+                                            rowValues.airportName(),
+                                            rowValues.economySeatsAmountNeeded(),
+                                            rowValues.businessSeatsAmountNeeded(),
+                                            rowValues.firstSeatsAmountNeeded(),
+                                            rowValues.cargoSeatsAmountNeeded(),
+                                            rowValues.economyPriceForRoute(),
+                                            rowValues.businessPriceForRoute(),
+                                            rowValues.firstPriceForRoute(),
+                                            rowValues.cargoPriceForRoute()));
+                        }
+                        back();
+                    }
                 }
             }
-        }
 
         //VALID CODE
 /*        PlanesListPage planeList = new PlanesListPage();
