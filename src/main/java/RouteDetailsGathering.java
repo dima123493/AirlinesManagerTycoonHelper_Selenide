@@ -1,5 +1,5 @@
 import filesManagment.ReadFile;
-import filesManagment.RecordFile;
+import filesManagment.WriteFile;
 import infoFromFiles.ReadGatheredResultFromPerfectSeatWebsiteFile;
 import pages.airlineManagerWebsite.*;
 
@@ -31,7 +31,7 @@ public class RouteDetailsGathering {
         routeListPage.getHrefsFromRouteList(routeInfoHrefs);
         routeListPage.printCollectedLinksAndCheckAmountOfItems(routeInfoHrefs, totalLinksNumber);
 
-        RecordFile info = new RecordFile();
+        WriteFile info = new WriteFile();
 
         List<String> listOfKms = new ArrayList<>();
         routeListPage.distanceOfTheRoutes(listOfKms);
@@ -123,7 +123,6 @@ class PlanesManagement {
         SchedulePage planesOmTheRoute = new SchedulePage();
         PlaneDetailsPage planeDetails = new PlaneDetailsPage();
         PlaneConfigurationPage planeConfiguration = new PlaneConfigurationPage();
-        boolean reconfiguration;
         open("https://tycoon.airlines-manager.com/network/generalplanning/1");
         List<List<String>> collectedOnRoutePlanesData = new ArrayList<>();
         planesOmTheRoute.collectInfoAboutPlanesAndWavesOnTheRoute(collectedOnRoutePlanesData);
@@ -131,37 +130,49 @@ class PlanesManagement {
         //this part reconfigures planes which are already on the route using data from Excel
         List<ReadGatheredResultFromPerfectSeatWebsiteFile> gatheredInfoFile = ReadFile.readGatheredResultFromPerfectSeatWebsiteFile();
 
-        for (List<String> record : collectedOnRoutePlanesData) {
-            open("https://tycoon.airlines-manager.com/aircraft/show/" + record.get(2));// record.get(2) - gets aircraft id
-
+        for (List<String> listRecord : collectedOnRoutePlanesData) {
+            open("https://tycoon.airlines-manager.com/aircraft/show/" + listRecord.get(2));// record.get(2) - gets aircraft id
             //find by name and extract data from that row
-            for (ReadGatheredResultFromPerfectSeatWebsiteFile rowValues : gatheredInfoFile) {
-                if (planeDetails.getAircraftName().contains(rowValues.airportName())) {
+            gatheredInfoFile.stream()
+                    .filter(excelRecord -> planeDetails.getAircraftName().contains(excelRecord.airportName()))
+                    .findFirst()
+                    .ifPresent(rowValues -> {
+                        open("https://tycoon.airlines-manager.com/aircraft/show/" + listRecord.get(2) + "/reconfigure");
+                        if (!planeConfiguration.isPageLoaded()) {
+                            refresh();
+                            open("https://tycoon.airlines-manager.com/aircraft/show/" + listRecord.get(2) + "/reconfigure");
+                        }
+                        String economySeats = rowValues.economySeatsAmountNeeded();
+                        String businessSeats = rowValues.businessSeatsAmountNeeded();
+                        String firstSeats = rowValues.firstSeatsAmountNeeded();
+                        String cargoSeats = rowValues.cargoSeatsAmountNeeded();
+                        var isReconfigured = planeConfiguration.configureAircraftSeats(economySeats, businessSeats, firstSeats, cargoSeats);
+                        if (isReconfigured == false) {//TODO should be TRUE
+                            int result = parseInt(rowValues.numberOfWavesNeeded()) - parseInt(listRecord.get(3));
+                            gatheredInfoFile.set(parseInt(rowValues.numberOfWavesNeeded()),
+                                    rowValues.withNumberOfWavesNeeded(String.valueOf(result))
+                            );
+                        }
+                    });
+
+/*            for (ReadGatheredResultFromPerfectSeatWebsiteFile rowValues : gatheredInfoFile) {
+                if (planeDetails.getAircraftName().contains(rowValues.airportName())) {//flightname
                     open(planeDetails.getConfigurationLink());
                     String economySeats = rowValues.economySeatsAmountNeeded();
                     String businessSeats = rowValues.businessSeatsAmountNeeded();
                     String firstSeats = rowValues.firstSeatsAmountNeeded();
                     String cargoSeats = rowValues.cargoSeatsAmountNeeded();
-                    reconfiguration = planeConfiguration.configureAircraftSeats(economySeats, businessSeats, firstSeats, cargoSeats);
-                    //TODO change amount of waves needed in the exel file on the amount of waves the plane does
-                    if (reconfiguration == false) {//TODO should be TRUE
-                        int result = parseInt(rowValues.numberOfWavesNeeded()) - parseInt(record.get(3));
+                    var reconfiguration = planeConfiguration.configureAircraftSeats(economySeats, businessSeats, firstSeats, cargoSeats);//isrecongigured
+                    if (false && reconfiguration) {//TODO should be TRUE
+                        int result = parseInt(rowValues.numberOfWavesNeeded()) - parseInt(listRecord.get(3));
                         gatheredInfoFile.set(parseInt(rowValues.numberOfWavesNeeded()),
-                                new ReadGatheredResultFromPerfectSeatWebsiteFile(
-                                        String.valueOf(result),// if number is negative you have to delete that amount of waves - 1
-                                        rowValues.airportName(),
-                                        rowValues.economySeatsAmountNeeded(),
-                                        rowValues.businessSeatsAmountNeeded(),
-                                        rowValues.firstSeatsAmountNeeded(),
-                                        rowValues.cargoSeatsAmountNeeded(),
-                                        rowValues.economyPriceForRoute(),
-                                        rowValues.businessPriceForRoute(),
-                                        rowValues.firstPriceForRoute(),
-                                        rowValues.cargoPriceForRoute()));
+                                rowValues.withNumberOfWavesNeeded(String.valueOf(result))
+                        );
                     }
                     back();
+                    break;
                 }
-            }
+            }*/
         }
 
         List<List<String>> modifiedDataList = new ArrayList<>();
@@ -178,9 +189,11 @@ class PlanesManagement {
                     rowValues.firstPriceForRoute(),
                     rowValues.cargoPriceForRoute()));
         }
-        RecordFile.writeInfoFromPerfectSeatFinderWebsite(modifiedDataList, "test");//todo "PerfectSeatFinder data minus actual"
-        //VALID CODE
-/*        PlanesListPage planeList = new PlanesListPage();
+        WriteFile.rewriteInfoFromPerfectSeatFinderWebsiteAfterPlaneConfiguration(modifiedDataList, "PerfectSeatFinderDataMinusActual");
+
+/*
+ //VALID CODE
+        PlanesListPage planeList = new PlanesListPage();
         open("https://tycoon.airlines-manager.com/aircraft");
         int totalNumberOfPlaneListPages = planeList.getTotalPageNumberAndReturnToFirstPage();
         List<String> linksToPlaneDetailsPage = new LinkedList<>();
