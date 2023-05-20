@@ -76,7 +76,7 @@ class ManageRoutePrices {
 
     public static void main(String[] args) throws IOException {
         var file1 = Path.of(getProperty("file-path-for-gathered-links-to-price-page"));
-        var file2 = Path.of("file-path-for-gathered-distance");
+        var file2 = Path.of(getProperty("file-path-for-gathered-distance"));
         List<String> pricePages = Files.readAllLines(file1);
         List<String> kilometers = Files.readAllLines(file2);
         List<ReadGatheredResultFromPerfectSeatWebsiteFile> gatheredInfoFile = ReadFile.readGatheredResultFromPerfectSeatWebsiteFile();

@@ -20,7 +20,6 @@ public class SchedulePage {
     String wavesPerPlane = "center";
 
     public void collectInfoAboutPlanesAndWavesOnTheRoute(List<List<String>> collectedData) {
-        $(By.className(loading)).shouldBe(Condition.hidden);
         ElementsCollection aircraft = $$(By.className(sortedTableRows));
 
         for (SelenideElement row : aircraft) {

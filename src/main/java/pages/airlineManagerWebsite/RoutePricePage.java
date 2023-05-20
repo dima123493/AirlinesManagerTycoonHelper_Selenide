@@ -32,6 +32,7 @@ public class RoutePricePage {
     }
 
     public void applyNewPrices(String economyPrice, String businessPrice, String firstPrice, String crgPrice) {
+        $(By.xpath("//*[@id=\"marketing_linePricing\"]/h2[2]")).scrollIntoView(true).shouldBe(Condition.visible);
         if ($(By.id(economyClassPrice)).is(Condition.visible)) {
             $(By.id(economyClassPrice)).clear();
             $(By.id(economyClassPrice)).setValue(economyPrice);

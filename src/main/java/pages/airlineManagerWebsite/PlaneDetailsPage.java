@@ -1,5 +1,6 @@
 package pages.airlineManagerWebsite;
 
+import com.codeborne.selenide.Condition;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -19,12 +20,12 @@ public class PlaneDetailsPage {
     String configurationLink = "//*[@id=\"subMenu\"]/a[3]";
 
     public String getConfigurationLink() {
-        return $x(configurationLink).getAttribute("href");
+        return $x(configurationLink).shouldBe(Condition.visible).getAttribute("href");
     }
 
     public String getAircraftName() {
         String collectedAircraftName = $x(aircraftName).getText();
-        return StringUtils.substringBefore(collectedAircraftName, "/").trim();
+        return StringUtils.substringAfter(collectedAircraftName, "/").trim();
     }
 
     public void getInfoAboutPlane(List<List<String>> infoAboutPlane) {

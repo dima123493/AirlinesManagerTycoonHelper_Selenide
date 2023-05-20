@@ -29,8 +29,8 @@ public class RouteDetailsPage {
             //You can uncomment this part if you want to perform an audit of specific route
             // can be reloaded on audit. should be checked
 
-            //RoutePricePage action = new RoutePricePage();
-            //action.auditProcedure();
+            RoutePricePage action = new RoutePricePage();
+            action.auditProcedure();
 
             String ecoDemand = $x(economyDemand).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
             String businDemand = $x(businessDemand).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");

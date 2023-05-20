@@ -1,6 +1,8 @@
 package infoFromFiles;
 
-public record ReadGatheredResultFromPerfectSeatWebsiteFile(String numberOfWavesNeeded,
+import lombok.With;
+
+public record ReadGatheredResultFromPerfectSeatWebsiteFile(@With String numberOfWavesNeeded,
                                                            String airportName,
                                                            String economySeatsAmountNeeded,
                                                            String businessSeatsAmountNeeded,
@@ -9,5 +11,4 @@ public record ReadGatheredResultFromPerfectSeatWebsiteFile(String numberOfWavesN
                                                            String economyPriceForRoute,
                                                            String businessPriceForRoute,
                                                            String firstPriceForRoute,
-                                                           String cargoPriceForRoute) {
-}
+                                                           String cargoPriceForRoute) { }
