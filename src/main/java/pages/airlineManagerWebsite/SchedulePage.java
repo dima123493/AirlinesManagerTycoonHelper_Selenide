@@ -1,17 +1,14 @@
 package pages.airlineManagerWebsite;
 
-import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 import org.openqa.selenium.By;
 
 import java.util.List;
 
-import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
 
 public class SchedulePage {
-    String loading = "planningLoadingBar";
     String sortedTableRows = "sortable";
     String aircraftModel = "blueText";
     String aircraftRouteName = "aircraftUserName";

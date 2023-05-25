@@ -26,9 +26,8 @@ public class RouteDetailsPage {
             String name = entry.getKey();
             open(entry.getValue());
 
-            //You can uncomment this part if you want to perform an audit of specific route
+            //You can comment this part if you don't want to perform an audit of specific route
             // can be reloaded on audit. should be checked
-
             RoutePricePage action = new RoutePricePage();
             action.auditProcedure();
 
