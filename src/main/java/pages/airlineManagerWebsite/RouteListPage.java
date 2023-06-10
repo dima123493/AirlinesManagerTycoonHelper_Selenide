@@ -14,16 +14,13 @@ public class RouteListPage {
 
     String distance = "//*[@id=\"lineList\"]//ul/li[1]/b";
 
+
+
     public void sortByRoutLength() {
         $(By.xpath(sortByRoutLength)).click();
     }
 
-    public int countLinks() {
-        ElementsCollection linksArray = $$x("//*[@id=\"lineList\"]/div/div/a");
-        return linksArray.size();
-    }
-
-    public void getHrefsFromRouteList(List<String> links) {
+    public void getHrefsFromRouteListPage(List<String> links) {
         ElementsCollection linksArray = $$x("//*[@id=\"lineList\"]/div/div/a");
         for (SelenideElement selenideElement : linksArray) {
             links.add(selenideElement.getAttribute("href"));
@@ -38,10 +35,4 @@ public class RouteListPage {
         System.out.println("Route length in km was gathered");
     }
 
-    public void printCollectedLinksAndCheckAmountOfItems(List<String> hrefs, int totalLinksNumber) {
-        for (String links : hrefs) {
-            System.out.println(links);
-        }
-        System.out.println(hrefs.size() + " === should be equal === " + totalLinksNumber);
-    }
 }
