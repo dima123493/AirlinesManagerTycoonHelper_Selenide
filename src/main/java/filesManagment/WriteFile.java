@@ -5,11 +5,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -17,7 +15,7 @@ import java.util.List;
 import static propertyLoader.AirlinesProperties.getProperty;
 
 public class WriteFile {
-    public void writeValuesForEachRoute(List<String> listOfKms, String fileName) {
+    public static void writeValuesIntoTextFile(List<String> listOfKms, String fileName) {
         try {
             Files.write(Path.of("D:\\AirlinesManager\\" + fileName + ".txt"), listOfKms);
         } catch (IOException e) {
@@ -25,12 +23,18 @@ public class WriteFile {
         }
     }
 
-    public void writeInfoFromInfoPage(List<List<String>> rows) {
-        File xlsxFile = new File(getProperty("result-file-location")); //this file should be created in advance
+    public static void writeInfoFromInfoPage(List<List<String>> rows) {
+        File xlsxFile = new File(getProperty("result-file-location"));
         FileInputStream inputStream;
         try {
+            if (xlsxFile.createNewFile()) {
+                XSSFWorkbook workbook = new XSSFWorkbook();
+                FileOutputStream out = new FileOutputStream(getProperty("result-file-location"));
+                workbook.write(out);
+                out.close();
+            }
             inputStream = new FileInputStream(xlsxFile);
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
         Workbook workbook;
@@ -98,6 +102,7 @@ public class WriteFile {
             header.createCell(7).setCellValue("Business Price");
             header.createCell(8).setCellValue("First Price");
             header.createCell(9).setCellValue("Cargo Price");
+            header.createCell(10).setCellValue("Time for 1 wave");
 
             for (int i = 0; i < rows.size(); i++) {
                 Row row = spreadsheet.createRow(i + 1);
