@@ -23,7 +23,7 @@ You also should provide other details, so be sure to check instructions there.
 
 ### Take off
 
-After basic configuration you can proceed to class called [RouteDetailsGathering](src/main/java/RouteDetailsGathering.java).
+After basic configuration you can proceed to class called [AllRoutesDetailsGathering](src/main/java/RouteDetailsGathering.java).
 The idea of this class is to gather basic route details of specified hub from website.
 Such info as airport destination name, economy, business, first classes and cargo demand as well as their ideal prices.
 
