@@ -5,6 +5,7 @@ import com.codeborne.selenide.ElementsCollection;
 import infoFromFiles.GatheredInfoTableRow;
 import org.openqa.selenium.By;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.codeborne.selenide.Selenide.*;
@@ -42,15 +43,12 @@ public class PerfectSeatFinderPage {
         return aircraftModel = "//*[@id=\"cf_aircraftmodel\"]/option[contains(text(),\"" + modelNumber + "\")]";
     }
 
-    public void fillTheFieldsOnTheWebsite(String sourceHubValue, String manufacturerName, String modelNumber, GatheredInfoTableRow row) {
+    public void fillTheFieldsOnTheWebsite(String manufacturerName, String modelNumber, GatheredInfoTableRow row) {
         $(By.id(aircraftManufacturerField)).click();
         $x(aircraftManufacturerSelector(manufacturerName)).click();
         $(By.id(aircraftModelField)).click();
         $x(aircraftModelSelector(modelNumber)).click();
-        $x(changeTypeToInputForSourceHub).click();
-        $(By.id(sourceHub)).click();
-        $(By.id(sourceHub)).setValue(sourceHubValue);
-        $x(changeTypeToInputForDestinationHub).click();
+
         $(By.id(destinationHub)).click();
         $(By.id(destinationHub)).setValue(row.destinationHubValue());
         $(By.id(economyDemand)).click();
@@ -94,6 +92,7 @@ public class PerfectSeatFinderPage {
         String busPrice = "//*[@id=\"nwy_seatconfigurator_wave_" + wavesNum + "_stats\"]/table[2]//tr[3]/td[3]";
         String firstPrice = "//*[@id=\"nwy_seatconfigurator_wave_" + wavesNum + "_stats\"]/table[2]//tr[3]/td[4]";
         String crgPrice = "//*[@id=\"nwy_seatconfigurator_wave_" + wavesNum + "_stats\"]/table[2]//tr[3]/td[5]";
+        String timeTaken = "//*[@id=\"nwy_seatconfigurator_wave_" + wavesNum + "_stats\"]/table[2]/tbody/tr[4]/td[2]/b";
 
         String ecoSeatResult = $x(ecoSeats).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
         String busSeatResult = $x(busSeats).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
@@ -104,8 +103,22 @@ public class PerfectSeatFinderPage {
         String busPriceResult = $x(busPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
         String firstPriceResult = $x(firstPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
         String cargoPriceResult = $x(crgPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
+        //String timeTakenForOneWave = $x(timeTaken).shouldBe(Condition.visible).getText().trim().replaceAll("^\\S*", "");
+        return new ArrayList<>(List.of(wavesNum, aitaCodeResult, ecoSeatResult, busSeatResult, fistSeatResult, cargoSeatResult, ecoPriceResult, busPriceResult, firstPriceResult, cargoPriceResult));
+    }
 
-        return List.of(wavesNum, aitaCodeResult, ecoSeatResult, busSeatResult, fistSeatResult, cargoSeatResult, ecoPriceResult, busPriceResult, firstPriceResult, cargoPriceResult);
+    public void removeRouteFromSearch(){
+        String removeRouteFromSearch = "//input[@alt='Remove']";
+        $x(removeRouteFromSearch).hover().click();
+        $x(removeRouteFromSearch).shouldBe(Condition.attribute("alt")).shouldBe(Condition.hidden);
+    }
+
+    public void changeHubInputType(String sourceHubValue) {
+        $x(changeTypeToInputForSourceHub).click();
+        $x(changeTypeToInputForDestinationHub).click();
+
+        $(By.id(sourceHub)).click();
+        $(By.id(sourceHub)).setValue(sourceHubValue);
     }
 
 }
