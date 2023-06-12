@@ -8,5 +8,6 @@ public record GatheredInfoTableRow(String destinationHubValue,
                                    String economyPriceValue,
                                    String businessPriceValue,
                                    String firstPriceValue,
-                                   String cargoPriceValue) {
+                                   String cargoPriceValue,
+                                   String distanceToAirport) {
 }

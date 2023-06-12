@@ -32,11 +32,11 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
     static final int A380_800_MAX_DISTANCE = 15556;
 
     public static void main(String[] args) throws IOException {
-        var dataFromExcel = ReadFile.readGatheredInfoFile();
+        var dataFromExcel = ReadFile.readGatheredInfoFile("AirlinesManagerAllRoutesInfo");//or AirlinesManagerNewRoutesInfo
         List<List<String>> dataFromPerfectSeatFinderSite = new ArrayList<>();
 
-        var file2 = Path.of(getProperty("file-path-to-distance-for-each-route"));
-        List<String> kilometers = Files.readAllLines(file2);
+        var file2 = Path.of(getProperty("file-path-to-distance-for-each-route"));//this can be removed if new version works
+        List<String> kilometers = Files.readAllLines(file2);//this can be removed if new version works
 
         Configuration.browserSize = "1920x1080";
         open(URL);
@@ -46,13 +46,14 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
         perfectSeatFinderPage.changeHubInputType(SOURCE_HUB_VALUE);
 
         for (var row : dataFromExcel) {
-            int routeDistance = Integer.parseInt(kilometers.get(dataFromExcel.indexOf(row)));
+            int routeDistance = Integer.parseInt(kilometers.get(dataFromExcel.indexOf(row)));//this can be removed if new version works
+            int routeDistanceFromExcel = Integer.parseInt(row.distanceToAirport());//new version
 
-            if (routeDistance <= CRJ_1000_MAX_DISTANCE) {
+            if (routeDistanceFromExcel <= CRJ_1000_MAX_DISTANCE) {
                 perfectSeatFinderPage.fillTheFieldsOnTheWebsite(CRJ_1000_MANUFACTURER_NAME, CRJ_1000_MODEL_NUMBER, row);
-            } else if (routeDistance > CRJ_1000_MAX_DISTANCE && routeDistance <= A300_600R_MAX_DISTANCE) {
+            } else if (routeDistanceFromExcel > CRJ_1000_MAX_DISTANCE && routeDistanceFromExcel <= A300_600R_MAX_DISTANCE) {
                 perfectSeatFinderPage.fillTheFieldsOnTheWebsite(A300_600R_MANUFACTURER_NAME, A300_600R_MODEL_NUMBER, row);
-            } else if (routeDistance > A300_600R_MAX_DISTANCE && routeDistance <= A380_800_MAX_DISTANCE) {
+            } else if (routeDistanceFromExcel > A300_600R_MAX_DISTANCE && routeDistanceFromExcel <= A380_800_MAX_DISTANCE) {
                 perfectSeatFinderPage.fillTheFieldsOnTheWebsite(A380_800_MANUFACTURER_NAME, A380_800_MODEL_NUMBER, row);
             } else {
                 perfectSeatFinderPage.fillTheFieldsOnTheWebsite("Airbus", "A350-900ULR", row); // plane with the longest distance in the game
@@ -66,12 +67,13 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
         RoutePlaningPage routeTime = new RoutePlaningPage();
         List<String> time = new LinkedList<>();
         for (var row : dataFromExcel) {
-            int routeDistance = Integer.parseInt(kilometers.get(dataFromExcel.indexOf(row)));
-            if (routeDistance <= CRJ_1000_MAX_DISTANCE) {
+            int routeDistance = Integer.parseInt(kilometers.get(dataFromExcel.indexOf(row)));//this can be removed if new version works
+            int routeDistanceFromExcel = Integer.parseInt(row.distanceToAirport());//new version
+            if (routeDistanceFromExcel <= CRJ_1000_MAX_DISTANCE) {
                 routeTime.getTimeForTheRouteWave(time,CRJ_1000_MODEL_NUMBER, row.destinationHubValue());
-            } else if (routeDistance > CRJ_1000_MAX_DISTANCE && routeDistance <= A300_600R_MAX_DISTANCE) {
+            } else if (routeDistanceFromExcel > CRJ_1000_MAX_DISTANCE && routeDistanceFromExcel <= A300_600R_MAX_DISTANCE) {
                 routeTime.getTimeForTheRouteWave(time,A300_600R_MODEL_NUMBER, row.destinationHubValue());
-            } else if (routeDistance > A300_600R_MAX_DISTANCE && routeDistance <= A380_800_MAX_DISTANCE) {
+            } else if (routeDistanceFromExcel > A300_600R_MAX_DISTANCE && routeDistanceFromExcel <= A380_800_MAX_DISTANCE) {
                 routeTime.getTimeForTheRouteWave(time,A380_800_MODEL_NUMBER, row.destinationHubValue());
             }
         }
@@ -80,7 +82,7 @@ public class ReadFromExelAndUseDataOnPerfectSeatFinderWebsite {
             dataFromPerfectSeatFinderSite.get(i).add(time.get(i));
         }
 
-        WriteFile.writeInfoFromPerfectSeatFinderWebsite(dataFromPerfectSeatFinderSite);
+        WriteFile.writeInfoFromPerfectSeatFinderWebsite(dataFromPerfectSeatFinderSite,"PerfectSeatFinderAllRoutes");
         closeWebDriver();
 
 /*        List<List<String>>listOfSeatFinder = new ArrayList<>();

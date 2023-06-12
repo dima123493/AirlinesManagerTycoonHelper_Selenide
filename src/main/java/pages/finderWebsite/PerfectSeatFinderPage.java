@@ -92,7 +92,6 @@ public class PerfectSeatFinderPage {
         String busPrice = "//*[@id=\"nwy_seatconfigurator_wave_" + wavesNum + "_stats\"]/table[2]//tr[3]/td[3]";
         String firstPrice = "//*[@id=\"nwy_seatconfigurator_wave_" + wavesNum + "_stats\"]/table[2]//tr[3]/td[4]";
         String crgPrice = "//*[@id=\"nwy_seatconfigurator_wave_" + wavesNum + "_stats\"]/table[2]//tr[3]/td[5]";
-        String timeTaken = "//*[@id=\"nwy_seatconfigurator_wave_" + wavesNum + "_stats\"]/table[2]/tbody/tr[4]/td[2]/b";
 
         String ecoSeatResult = $x(ecoSeats).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
         String busSeatResult = $x(busSeats).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
@@ -103,7 +102,7 @@ public class PerfectSeatFinderPage {
         String busPriceResult = $x(busPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
         String firstPriceResult = $x(firstPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
         String cargoPriceResult = $x(crgPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
-        //String timeTakenForOneWave = $x(timeTaken).shouldBe(Condition.visible).getText().trim().replaceAll("^\\S*", "");
+
         return new ArrayList<>(List.of(wavesNum, aitaCodeResult, ecoSeatResult, busSeatResult, fistSeatResult, cargoSeatResult, ecoPriceResult, busPriceResult, firstPriceResult, cargoPriceResult));
     }
 

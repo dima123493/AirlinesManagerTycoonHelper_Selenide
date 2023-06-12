@@ -3,6 +3,7 @@ package pages.airlineManagerWebsite;
 import com.codeborne.selenide.Condition;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,15 +22,13 @@ public class RouteDetailsPage {
     public static final String firstPrice = "//*[@id=\"marketing_linePricing\"]/div[3]/div[3]/div[2]/b";
     public static final String cargoPrice = "//*[@id=\"marketing_linePricing\"]/div[3]/div[4]/div[2]/b";
     public static final String linkToPricesPage = "//*[@id=\"showLine\"]/div[5]/div/a";
-    public void collectDemandValueAndPrices(Map<String, String> nameOfAirportAndLink, List<List<String>> rows) {
-        for (Map.Entry<String, String> entry : nameOfAirportAndLink.entrySet()) {
-            String name = entry.getKey();
-            open(entry.getValue());
+    public static final String distance = "//*[@id=\"box2\"]/li[2]/b";
 
+    public void collectDemandValueAndPrices(String nameOfAirport, List<List<String>> rows) {
             //You can comment this part if you don't want to perform an audit of specific route
             // can be reloaded on audit. should be checked
-            RoutePricePage action = new RoutePricePage();
-            action.auditProcedure();
+            /*RoutePricePage action = new RoutePricePage();
+            action.auditProcedure();*/
 
             String ecoDemand = $x(economyDemand).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
             String businDemand = $x(businessDemand).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
@@ -41,13 +40,20 @@ public class RouteDetailsPage {
             String frtPrice = $x(firstPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
             String cargPrice = $x(cargoPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
 
-            rows.add(List.of(name, ecoDemand, businDemand, frtDemand, cargDemand, ecoPrice, businPrice, frtPrice, cargPrice));
-        }
+            rows.add(new ArrayList<> (List.of(nameOfAirport, ecoDemand, businDemand, frtDemand, cargDemand, ecoPrice, businPrice, frtPrice, cargPrice)));
     }
 
     public void collectAirprotNamesAndLinksToRoutePrice(Map<String, String> nameOfAirportAndLink) {
         String portName = $x(airportName).shouldBe(Condition.visible).getText().trim().toUpperCase().substring(0, 3);
         String link = $x(linkToPricesPage).shouldBe(Condition.visible, Duration.ofSeconds(30)).getAttribute("href");
         nameOfAirportAndLink.put(portName, link);
+    }
+
+    public void getDistance(List<String> listOfKms){
+        listOfKms.add($x(distance).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", ""));
+    }
+
+    public String collectLinkToRoutePrice() {
+        return $x(linkToPricesPage).shouldBe(Condition.visible, Duration.ofSeconds(30)).getAttribute("href");
     }
 }
