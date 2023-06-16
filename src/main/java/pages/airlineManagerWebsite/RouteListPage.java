@@ -6,18 +6,18 @@ import com.codeborne.selenide.SelenideElement;
 import org.openqa.selenium.By;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$x;
 
 public class RouteListPage {
-    String sortByRoutLength = "//input[@value='distanceMinus']";
+    String sortByRoutLengthASD = "//input[@value='distanceMinus']";
     String distance = "//*[@id=\"lineList\"]//ul/li[1]/b";
-    String lineDropdown = "linePicker";
     String lineDropDownOptions = "//*[@id=\"map_filters\"]//option";
 
     public void sortByRoutLength() {
-        $(By.xpath(sortByRoutLength)).click();
+        $(By.xpath(sortByRoutLengthASD)).click();
     }
 
     public void getHrefsFromRouteListPage(List<String> links) {
@@ -35,8 +35,13 @@ public class RouteListPage {
         System.out.println("Route length in km was gathered");
     }
 
-    public String getEndpointFromRouteList(String airportName) {
-        return $$x(lineDropDownOptions).find(Condition.partialText(airportName)).getAttribute("value");
+    public void collectAirportNamesAndTheirLinks( Map<String,String> airportNames){
+        List<SelenideElement> airportLocators =  $$x(lineDropDownOptions);
+        for(SelenideElement element :airportLocators){
+            String text = element.getText();
+            String aitaCode = text.substring(text.length() - 3);
+            airportNames.put(aitaCode,element.getAttribute("value"));
+        }
     }
 
 }
