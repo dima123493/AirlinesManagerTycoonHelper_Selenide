@@ -11,4 +11,5 @@ public record ReadGatheredResultFromPerfectSeatWebsiteFile(@With String numberOf
                                                            String economyPriceForRoute,
                                                            String businessPriceForRoute,
                                                            String firstPriceForRoute,
-                                                           String cargoPriceForRoute) { }
+                                                           String cargoPriceForRoute,
+                                                           String timeTakenForOneWave) { }

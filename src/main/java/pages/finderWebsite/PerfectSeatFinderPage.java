@@ -68,7 +68,7 @@ public class PerfectSeatFinderPage {
         $(By.id(cargoPrice)).click();
         $(By.id(cargoPrice)).setValue(row.cargoPriceValue());
         $(By.id(addToCircuitButton)).click();
-        $(By.id(avoidNegativeConfigurationsCheckBox)).click();
+        $(By.id(avoidNegativeConfigurationsCheckBox)).shouldBe(Condition.visible).click();
         $(By.id(calculateButton)).click();
         $x(selectDropdown).scrollTo().click();
         $x(selectDropdown).selectOption(lastElementValueInTheDropDown($$x(waveDropdown)));
@@ -92,6 +92,7 @@ public class PerfectSeatFinderPage {
         String busPrice = "//*[@id=\"nwy_seatconfigurator_wave_" + wavesNum + "_stats\"]/table[2]//tr[3]/td[3]";
         String firstPrice = "//*[@id=\"nwy_seatconfigurator_wave_" + wavesNum + "_stats\"]/table[2]//tr[3]/td[4]";
         String crgPrice = "//*[@id=\"nwy_seatconfigurator_wave_" + wavesNum + "_stats\"]/table[2]//tr[3]/td[5]";
+        String timeForOneWave = "//*[@id=\"nwy_seatconfigurator_wave_" + wavesNum + "_stats\"]//tr[4]/td[2]/b";
 
         String ecoSeatResult = $x(ecoSeats).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
         String busSeatResult = $x(busSeats).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
@@ -102,11 +103,12 @@ public class PerfectSeatFinderPage {
         String busPriceResult = $x(busPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
         String firstPriceResult = $x(firstPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
         String cargoPriceResult = $x(crgPrice).shouldBe(Condition.visible).getText().trim().replaceAll("\\D+", "");
-
-        return new ArrayList<>(List.of(wavesNum, aitaCodeResult, ecoSeatResult, busSeatResult, fistSeatResult, cargoSeatResult, ecoPriceResult, busPriceResult, firstPriceResult, cargoPriceResult));
+        String tmeOneWave = $x(timeForOneWave).shouldBe(Condition.visible).getText().trim().replaceAll("(?= ).*", "");
+        String formattedTime = timeFormatter(tmeOneWave);
+        return new ArrayList<>(List.of(wavesNum, aitaCodeResult, ecoSeatResult, busSeatResult, fistSeatResult, cargoSeatResult, ecoPriceResult, busPriceResult, firstPriceResult, cargoPriceResult, formattedTime));
     }
 
-    public void removeRouteFromSearch(){
+    public void removeRouteFromSearch() {
         String removeRouteFromSearch = "//input[@alt='Remove']";
         $x(removeRouteFromSearch).hover().click();
         $x(removeRouteFromSearch).shouldBe(Condition.attribute("alt")).shouldBe(Condition.hidden);
@@ -118,6 +120,25 @@ public class PerfectSeatFinderPage {
 
         $(By.id(sourceHub)).click();
         $(By.id(sourceHub)).setValue(sourceHubValue);
+    }
+
+    public static String timeFormatter(String incorrectFormatTime) {
+        String[] elements = incorrectFormatTime.split("\\.");
+        String hours = elements[0];
+        String minutes = elements[1];
+
+        if (minutes.equals("00")) {
+            minutes = "00";
+        }else if(minutes.equals("25")){
+            minutes = "15";
+        }else if(minutes.equals("50")){
+            minutes = "30";
+        }else if(minutes.equals("75")){
+            minutes = "45";
+        }
+
+        String result = hours.trim() + ":" + minutes;
+        return result.trim();
     }
 
 }
