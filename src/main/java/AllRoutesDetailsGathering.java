@@ -1,5 +1,6 @@
 import filesManagment.ReadFile;
 import filesManagment.WriteFile;
+import infoFromFiles.FlightLog;
 import infoFromFiles.GatheredInfoTableRow;
 import infoFromFiles.ReadGatheredResultFromPerfectSeatWebsiteFile;
 import infoFromFiles.SeatConfiguration;
@@ -8,9 +9,6 @@ import timeOptimizer.FlightId;
 import timeOptimizer.FlightInfo;
 import timeOptimizer.PlanePool;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,39 +27,23 @@ public class AllRoutesDetailsGathering {
         List<String> listOfKms = new LinkedList<>();
         List<String> routeInfoHrefs = new LinkedList<>();
         Map<String, String> nameOfAirportAndLinkToRoutePrices = new LinkedHashMap<>();
-        List<String> linksToPricePage = new LinkedList<>(nameOfAirportAndLinkToRoutePrices.values());
         List<List<String>> rowsWithInfoForPerfectSeatFinder = new LinkedList<>();
 
         loginOnWebsite(getProperty("login-email"), getProperty("login-password"));
-        //Configuration.browserSize = "1920x1080";
         open(URL + "/network/showhub/" + getProperty("hub-link-id") + "/linelist");
-        //zoom(0.5);
         routeList.sortByRoutLength();
         routeList.getHrefsFromRouteListPage(routeInfoHrefs);
         routeList.distanceOfTheRoutes(listOfKms);
 
-        //this opens links of route details and collects Airport Name and link to route price
-        for (String href : routeInfoHrefs) {
-            open(href);
-            routeDetails.collectAirprotNamesAndLinksToRoutePrice(nameOfAirportAndLinkToRoutePrices);
-        }
+        collectsAirportNameAndLinkToRoutePrice(routeDetails, routeInfoHrefs, nameOfAirportAndLinkToRoutePrices);
 
-        System.out.println(linksToPricePage);
-        //this collects Demand Value And Prices from route price page
-        for (Map.Entry<String, String> entry : nameOfAirportAndLinkToRoutePrices.entrySet()) {
-            String nameOfAirport = entry.getKey();
-            open(entry.getValue());
-            routeDetails.collectDemandValueAndPrices(nameOfAirport, rowsWithInfoForPerfectSeatFinder);
-        }
-        System.out.println(nameOfAirportAndLinkToRoutePrices.values());
+        collectsDemandValueAndPricesFromRoutePricePage(nameOfAirportAndLinkToRoutePrices, routeDetails, rowsWithInfoForPerfectSeatFinder);
 
-        //WriteFile.writeValuesIntoTextFile(listOfKms, getProperty("file-name-for-gathered-distance"));
         for (int i = 0; i < rowsWithInfoForPerfectSeatFinder.size(); i++) {
             rowsWithInfoForPerfectSeatFinder.get(i).add(listOfKms.get(i));
         }
 
-        WriteFile.writeValuesIntoTextFile(linksToPricePage, getProperty("file-name-for-gathered-links-to-price-page"));
-        WriteFile.writeInfoFromInfoPage(rowsWithInfoForPerfectSeatFinder, "AirlinesManagerAllRoutesInfo");
+        WriteFile.writeInfoFromInfoPage(rowsWithInfoForPerfectSeatFinder, "AM_AllRoutesInfo");
 
         closeWebDriver();
     }
@@ -76,15 +58,28 @@ public class AllRoutesDetailsGathering {
         }
     }
 
+    public static void collectsAirportNameAndLinkToRoutePrice(RouteDetailsPage routeDetails, List<String> routeInfoHrefs, Map<String, String> nameOfAirportAndLinkToRoutePrices) {
+        for (String href : routeInfoHrefs) {
+            open(href);
+            routeDetails.collectAirprotNamesAndLinksToRoutePrice(nameOfAirportAndLinkToRoutePrices);
+        }
+    }
+
+    public static void collectsDemandValueAndPricesFromRoutePricePage(Map<String, String> nameOfAirportAndLinkToRoutePrices, RouteDetailsPage routeDetails, List<List<String>> rowsWithInfoForPerfectSeatFinder) {
+        for (Map.Entry<String, String> entry : nameOfAirportAndLinkToRoutePrices.entrySet()) {
+            String nameOfAirport = entry.getKey();
+            open(entry.getValue());
+            routeDetails.collectDemandValueAndPrices(nameOfAirport, rowsWithInfoForPerfectSeatFinder);
+        }
+    }
+
 }
 
 class NewOrMissedRoutesDetailsGathering {
     public static final String URL = getProperty("airlines-manager-base-url");
 
     public static void main(String[] args) {
-        /*var routeNameToAnalyze = Path.of(getProperty("file-path-for-new-routes-names-to-analyze"));
-        List<String> routeName = Files.readAllLines(routeNameToAnalyze);*/
-        var dataFromExcel = ReadFile.readGatheredInfoFile("AirlinesManagerAllRoutesInfo");
+        var dataFromExcel = ReadFile.readGatheredInfoFile("AM_AllRoutesInfo");
         Map<String, String> allRoutes = new LinkedHashMap<>();
         List<List<String>> rowsWithInfoForPerfectSeatFinder = new LinkedList<>();
         List<String> listOfKms = new LinkedList<>();
@@ -96,6 +91,7 @@ class NewOrMissedRoutesDetailsGathering {
         open(URL + "/network/showhub/" + getProperty("hub-link-id") + "/linelist");
 
         routeListPage.collectAirportNamesAndTheirLinks(allRoutes);
+        //analyzes rows from Excel and gathered airport names (and links) from website, excludes existing airports from files
         var allDestinationsFromExcel = dataFromExcel.stream()
                 .map(GatheredInfoTableRow::destinationHubValue)
                 .collect(Collectors.toSet());
@@ -103,6 +99,7 @@ class NewOrMissedRoutesDetailsGathering {
                 .filter(e -> !allDestinationsFromExcel.contains(e.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
+        //gathers information about routes which were not in the file yet
         for (Map.Entry<String, String> data : allRoutesFiltered.entrySet()) {
             open(URL + data.getValue());
             routeDetailsPage.getDistance(listOfKms);
@@ -114,36 +111,134 @@ class NewOrMissedRoutesDetailsGathering {
             rowsWithInfoForPerfectSeatFinder.get(i).add(listOfKms.get(i));
         }
 
-        WriteFile.writeInfoFromInfoPage(rowsWithInfoForPerfectSeatFinder, "AirlinesManagerNewRoutesInfo");
+        WriteFile.writeInfoFromInfoPage(rowsWithInfoForPerfectSeatFinder, "AM_NewMissedRoutesInfo");
     }
 }
 
-class ManageRoutePrices {
+class ManageAllRoutePrices {
+    public static final String URL = getProperty("airlines-manager-base-url");
 
-    public static void main(String[] args) throws IOException {
-        Path linksToPricePageFile = Path.of(getProperty("file-path-for-gathered-links-to-price-page"));
-        //Path distanceForEachRoute = Path.of(getProperty("file-path-for-gathered-distance"));
-        List<String> pricePages = Files.readAllLines(linksToPricePageFile);
-        //List<String> kilometers = Files.readAllLines(distanceForEachRoute);
-        List<ReadGatheredResultFromPerfectSeatWebsiteFile> gatheredInfoFile = ReadFile.readGatheredResultFromPerfectSeatWebsiteFile("PerfectSeatFinderAllRoutes");
-        if (!(pricePages.size() == gatheredInfoFile.size())) {//== kilometers.size() && kilometers.size() ==
-            throw new IllegalStateException("Number of rows in files do not match! Important info is missing!");
+    public static void main(String[] args) {
+        List<ReadGatheredResultFromPerfectSeatWebsiteFile> gatheredInfoFile = ReadFile.readGatheredResultFromPerfectSeatWebsiteFile("PSF_AllRoutesInfo");
+
+        AllRoutesDetailsGathering.loginOnWebsite(getProperty("login-email"), getProperty("login-password"));
+        open(URL + "/network/showhub/" + getProperty("hub-link-id") + "/linelist");
+
+        RouteListPage routeListPage = new RouteListPage();
+
+        Map<String, String> allRoutes = new LinkedHashMap<>();
+
+        routeListPage.collectAirportNamesAndTheirLinks(allRoutes);
+
+        getValueFromFileAndApplyPriceForRoute(gatheredInfoFile, allRoutes);
+    }
+
+    public static void getValueFromFileAndApplyPriceForRoute(List<ReadGatheredResultFromPerfectSeatWebsiteFile> gatheredInfoFile, Map<String, String> allRoutes) {
+        RouteDetailsPage routeDetailsPage = new RouteDetailsPage();
+        RoutePricePage managePricesForRoute = new RoutePricePage();
+
+        for (int i = 0; i <= gatheredInfoFile.size(); i++) {
+            var row = gatheredInfoFile.get(i);
+            if (allRoutes.containsKey(row.airportName())) {
+                open(URL + allRoutes.get(row.airportName()));
+                open(routeDetailsPage.collectLinkToRoutePrice());
+                String economyPrice = row.economyPriceForRoute();
+                String businessPrice = row.businessPriceForRoute();
+                String firstPrice = row.firstPriceForRoute();
+                String cargoPrice = row.cargoPriceForRoute();
+                managePricesForRoute.applyNewPrices(economyPrice, businessPrice, firstPrice, cargoPrice);
+            }
         }
+    }
+
+}
+
+class ManageNewRoutePrices {
+
+    public static void main(String[] args) {
+        List<ReadGatheredResultFromPerfectSeatWebsiteFile> gatheredInfoFile = ReadFile.readGatheredResultFromPerfectSeatWebsiteFile("PSF_NewMissedRoutesInfo");
 
         AllRoutesDetailsGathering.loginOnWebsite(getProperty("login-email"), getProperty("login-password"));
 
-        RoutePricePage managePricesForRoute = new RoutePricePage();
+        RouteListPage routeListPage = new RouteListPage();
 
-        for (int i = 0; i < pricePages.size(); i++) {
-            var row = gatheredInfoFile.get(i);
-            open(pricePages.get(i));
-            String economyPrice = row.economyPriceForRoute();
-            String businessPrice = row.businessPriceForRoute();
-            String firstPrice = row.firstPriceForRoute();
-            String cargoPrice = row.cargoPriceForRoute();
-            managePricesForRoute.applyNewPrices(economyPrice, businessPrice, firstPrice, cargoPrice);
+        Map<String, String> allRoutes = new LinkedHashMap<>();
+
+        routeListPage.collectAirportNamesAndTheirLinks(allRoutes);
+
+        ManageAllRoutePrices.getValueFromFileAndApplyPriceForRoute(gatheredInfoFile, allRoutes);
+    }
+}
+
+class RouteTimeTableOptimizer {
+
+    public static void main(String[] args) {
+        var dataFromExcel = ReadFile.readGatheredResultFromPerfectSeatWebsiteFile("PSF_NewMissedRoutesInfo");// "PSF_NewMissedRoutesInfo" "PSF_AllRoutesInfo"
+
+        Map<SeatConfiguration, Map<FlightId, FlightInfo>> configuration = new HashMap<>();
+        for (var row : dataFromExcel) {
+            var seatConfig = new SeatConfiguration(
+                    parseInt(row.economySeatsAmountNeeded()),
+                    parseInt(row.businessSeatsAmountNeeded()),
+                    parseInt(row.firstSeatsAmountNeeded()),
+                    parseInt(row.cargoSeatsAmountNeeded()));
+            FlightId flightId = new FlightId(row.airportName());
+            FlightInfo flightInfo = new FlightInfo(
+                    parseInt(row.numberOfWavesNeeded()),
+                    convertToDuration(row.timeTakenForOneWave())
+            );
+            configuration.merge(seatConfig, new HashMap<>(Map.of(flightId, flightInfo)),
+                    (old, el) -> {
+                        old.putAll(el);
+                        return old;
+                    });
         }
 
+
+        List<FlightLog> log = new ArrayList<>();
+        List<List<String>> timeTableOptimizedToRecord = new ArrayList<>();
+
+        // Map<SeatConfiguration, PlanePool> planePools = new HashMap<>();
+        for (var configurationMapEntry : configuration.entrySet()) {
+//            var minimalTime = configurationMapEntry.getValue().values().stream()
+//                    .map(FlightInfo::getDuration)
+//                    .min(Comparator.naturalOrder());
+            PlanePool planePool = new PlanePool();
+            // planePools.put(configurationMapEntry.getKey(), planePool);
+            for (var flight : configurationMapEntry.getValue().entrySet()) {
+
+                FlightInfo info = flight.getValue();
+                while (info.getNumberOfWaves() > 0) {
+                    planePool.performOneFlight(info.getDuration(), flight.getKey(), log);
+                    info.decrementNumberOfWaves();
+                }
+            }
+        }
+
+        /*for(Map.Entry<SeatConfiguration, PlanePool> info : planePools.entrySet()){
+            System.out.println(info.getKey());
+            System.out.println(info.getValue().toString());
+        }*/
+
+        for (FlightLog info : log) {
+            String id = String.valueOf(info.planeId());
+            String name = info.airportName();
+            String timeTakn = info.timeTaken().toHoursPart() + ":" + info.timeTaken().toMinutesPart();
+            String timeLft = info.timeLeft().toHoursPart() + ":" + info.timeLeft().toMinutesPart();
+            timeTableOptimizedToRecord.add(List.of(id, name, timeTakn, timeLft));
+        }
+
+        WriteFile.writeTimetableOptimizationCalculations(timeTableOptimizedToRecord, "Schedule");
+
+    }
+
+    public static Duration convertToDuration(String time) {
+        String[] tokens = time.split(":");
+        int hours = Integer.parseInt(tokens[0]);
+        int minutes = Integer.parseInt(tokens[1]);
+        Duration hour = Duration.ofHours(hours);
+        Duration minute = Duration.ofMinutes(minutes);
+        return hour.plus(minute);
     }
 
 }
@@ -157,7 +252,7 @@ class PlanesManagement {
         PlaneConfigurationPage planeConfiguration = new PlaneConfigurationPage();
 
         List<List<String>> collectedOnRoutePlanesData = new ArrayList<>();
-        List<ReadGatheredResultFromPerfectSeatWebsiteFile> gatheredInfoFile = ReadFile.readGatheredResultFromPerfectSeatWebsiteFile("PerfectSeatFinderAllRoutes");
+        List<ReadGatheredResultFromPerfectSeatWebsiteFile> gatheredInfoFile = ReadFile.readGatheredResultFromPerfectSeatWebsiteFile("PSF_AllRoutesInfo");
 
         open("https://tycoon.airlines-manager.com/network/generalplanning/1");
         planesOnTheRoute.collectInfoAboutPlanesAndWavesOnTheRoute(collectedOnRoutePlanesData);
@@ -204,26 +299,8 @@ class PlanesManagement {
                     rowValues.cargoPriceForRoute()));
         }
 
-        WriteFile.writeInfoFromPerfectSeatFinderWebsite(modifiedDataList, "PerfectSeatFinderDataMinusActual");
+        WriteFile.writeInfoFromPerfectSeatFinderWebsite(modifiedDataList, "PSF_DataMinusActual");
 
-        /*            for (ReadGatheredResultFromPerfectSeatWebsiteFile rowValues : gatheredInfoFile) {
-                if (planeDetails.getAircraftName().contains(rowValues.airportName())) {//flightname
-                    open(planeDetails.getConfigurationLink());
-                    String economySeats = rowValues.economySeatsAmountNeeded();
-                    String businessSeats = rowValues.businessSeatsAmountNeeded();
-                    String firstSeats = rowValues.firstSeatsAmountNeeded();
-                    String cargoSeats = rowValues.cargoSeatsAmountNeeded();
-                    var reconfiguration = planeConfiguration.configureAircraftSeats(economySeats, businessSeats, firstSeats, cargoSeats);//isrecongigured
-                    if (false && reconfiguration) {
-                        int result = parseInt(rowValues.numberOfWavesNeeded()) - parseInt(listRecord.get(3));
-                        gatheredInfoFile.set(parseInt(rowValues.numberOfWavesNeeded()),
-                                rowValues.withNumberOfWavesNeeded(String.valueOf(result))
-                        );
-                    }
-                    back();
-                    break;
-                }
-            }*/
     }
 
     public static void performCheck(PlaneDetailsPage planeDetails, List<String> linksToPlaneDetailsPage) {
@@ -243,121 +320,4 @@ class PlanesManagement {
         }
     }
 
-}
-
-/*class PlanePool {
-    List<Plane> pool = new ArrayList<>();
-
-    void performOneFlight(Duration flightDuration) {
-        var planeOptional = pool.stream()
-                .filter(plane -> plane.getTime().compareTo(flightDuration) >= 0)
-                .findFirst();
-        if (planeOptional.isPresent()) {
-            planeOptional.get().performOneFlight(flightDuration);
-        } else {
-            pool.add(new Plane());
-            performOneFlight(flightDuration);
-        }
-    }
-}*/
-
-class RouteTimeTableOptimizer {
-    static final Duration duration = Duration.ofHours(24);
-
-    public static void main(String[] args) {
-        var dataFromExcel = ReadFile.readGatheredResultFromPerfectSeatWebsiteFile("AirlinesManagerNewRoutesInfo");//or AirlinesManagerAllRoutesInfo
-
-        Map<SeatConfiguration, Map<FlightId, FlightInfo>> configuration = new HashMap<>();
-        for (var row : dataFromExcel) {
-            var seatConfig = new SeatConfiguration(
-                    parseInt(row.economySeatsAmountNeeded()),
-                    parseInt(row.businessSeatsAmountNeeded()),
-                    parseInt(row.firstSeatsAmountNeeded()),
-                    parseInt(row.cargoSeatsAmountNeeded()));
-            FlightId flightId = new FlightId(row.airportName());
-            FlightInfo flightInfo = new FlightInfo(
-                    parseInt(row.numberOfWavesNeeded()),
-                    convertToDuration(row.timeTakenForOneWave())
-            );
-            configuration.merge(seatConfig, new HashMap<>(Map.of(flightId, flightInfo)),
-                    (old, el) -> {
-                        old.putAll(el);
-                        return old;
-                    });
-        }
-
-        PlanePool planePool = new PlanePool();
-
-        for (var configurationMapEntry : configuration.entrySet()) {
-//            var minimalTime = configurationMapEntry.getValue().values().stream()
-//                    .map(FlightInfo::getDuration)
-//                    .min(Comparator.naturalOrder());
-            for (var flight : configurationMapEntry.getValue().entrySet()) {
-
-                FlightInfo info = flight.getValue();// numberOfWavesNeeded and timeTakenForOneWave
-                while (info.getNumberOfWaves() > 0) {//and seats check
-                    planePool.performOneFlight(info.getDuration(), flight.getKey());
-                    info.decrementNumberOfWaves();
-                }
-            }
-        }
-    }
-
-/*        List<Integer> wavesPerDayCanBeDone = new LinkedList<>();
-        List<String> timeRemain = new LinkedList<>();
-
-        for (var row : dataFromExcel) {
-            String[] tokens = row.timeTakenForOneWave().split(":");
-            int hours = Integer.parseInt(tokens[0]);
-            int minutes = Integer.parseInt(tokens[1]);
-
-            int waveAmountPerDay = wavesPerDay(hours, minutes);
-            if (parseInt(row.numberOfWavesNeeded()) < waveAmountPerDay) {
-                Duration remainingTime = remainingTime(hours, minutes, parseInt(row.numberOfWavesNeeded()));
-                wavesPerDayCanBeDone.add(parseInt(row.numberOfWavesNeeded()));
-                timeRemain.add(remainingTime.toHoursPart() + ":" + remainingTime.toMinutesPart());
-            } else {
-                wavesPerDayCanBeDone.add(waveAmountPerDay);
-                Duration remainingTime = remainingTime(hours, minutes, waveAmountPerDay);
-                timeRemain.add(remainingTime.toHoursPart() + ":" + remainingTime.toMinutesPart());
-            }
-        }
-
-        for (var row : dataFromExcel) {
-            String[] tokens = row.timeTakenForOneWave().split(":");
-            int hours = Integer.parseInt(tokens[0]);
-            int minutes = Integer.parseInt(tokens[1]);
-
-            String[] remain = timeRemain.get().split(":");
-            int remainHours = Integer.parseInt(remain[0]);
-            int remainMinutes = Integer.parseInt(remain[1]);
-            if () {
-
-            }
-        }*/
-
-    public static Duration convertToDuration(String time) {
-        String[] tokens = time.split(":");
-        int hours = Integer.parseInt(tokens[0]);
-        int minutes = Integer.parseInt(tokens[1]);
-        Duration hour = Duration.ofHours(hours);
-        Duration minute = Duration.ofMinutes(minutes);
-        return hour.plus(minute);
-    }
-
-    public static int wavesPerDay(Duration time) {
-        return (int) duration.dividedBy(time);
-    }
-
-    public static int wavesPerDay(int hours, int minutes) {
-        Duration hour = Duration.ofHours(hours);
-        Duration minute = Duration.ofMinutes(minutes);
-        return (int) duration.dividedBy(hour.plus(minute));
-    }
-
-    public static Duration remainingTime(int hours, int minutes, int waveAmountPerDay) {
-        Duration hour = Duration.ofHours(hours);
-        Duration minute = Duration.ofMinutes(minutes);
-        return duration.minus(hour.plus(minute).multipliedBy(waveAmountPerDay));
-    }
-}
+}//TODO lost its sense due to RouteTimeTableOptimizer

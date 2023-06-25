@@ -1,6 +1,5 @@
 package pages.airlineManagerWebsite;
 
-import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 import org.openqa.selenium.By;
@@ -32,14 +31,13 @@ public class RouteListPage {
         for (SelenideElement selenideElement : linksArray) {
             listOfKms.add(String.valueOf(selenideElement).replaceAll("\\D+", ""));
         }
-        System.out.println("Route length in km was gathered");
     }
 
     public void collectAirportNamesAndTheirLinks( Map<String,String> airportNames){
         List<SelenideElement> airportLocators =  $$x(lineDropDownOptions);
         for(SelenideElement element :airportLocators){
             String text = element.getText();
-            String aitaCode = text.substring(text.length() - 3);
+            String aitaCode = text.substring(text.length() - 3).trim();
             airportNames.put(aitaCode,element.getAttribute("value"));
         }
     }

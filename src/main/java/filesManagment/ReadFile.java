@@ -2,7 +2,6 @@ package filesManagment;
 
 import infoFromFiles.GatheredInfoTableRow;
 import infoFromFiles.ReadGatheredResultFromPerfectSeatWebsiteFile;
-import infoFromFiles.testRecord;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -66,7 +65,7 @@ public class ReadFile {
                 var businessPriceForRoute = sheet.getRow(i).getCell(7).getStringCellValue();
                 var firstPriceForRoute = sheet.getRow(i).getCell(8).getStringCellValue();
                 var cargoPriceForRoute = sheet.getRow(i).getCell(9).getStringCellValue();
-                //var timeTakenForOneWave = sheet.getRow(i).getCell(10).getStringCellValue();
+                var timeTakenForOneWave = sheet.getRow(i).getCell(10).getStringCellValue();
                 dataFromExcel.add(new ReadGatheredResultFromPerfectSeatWebsiteFile(numberOfWavesNeeded,
                         airportName,
                         economySeatsAmountNeeded,
@@ -76,7 +75,8 @@ public class ReadFile {
                         economyPriceForRoute,
                         businessPriceForRoute,
                         firstPriceForRoute,
-                        cargoPriceForRoute));
+                        cargoPriceForRoute,
+                        timeTakenForOneWave));
             }
         } catch (Exception e) {
             System.out.println("Check the fields values in the table for file on the ResultFromWebsite Excel list (it should be 10 in total and file suppose to exist while it was already used)");

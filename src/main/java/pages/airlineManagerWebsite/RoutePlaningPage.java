@@ -11,6 +11,7 @@ import static com.codeborne.selenide.Selenide.*;
 
 public class RoutePlaningPage {
     private static final String CAROUSEL_VIEW = "carouselView";
+    private static final String aircraftsBoxes = ".aircraftsBox";
     private static final String collectionOfAirCrafts = "//*[@id=\"carouselView\"]/div/div";
     private static final String aircraftModel = "//span[@class=\"bold\"]";
     private static final String searchAirportNameField = "lineNameFilter";
@@ -26,8 +27,20 @@ public class RoutePlaningPage {
 
     public Map<String, String> airCrafts = new LinkedHashMap<>();
 
+    int clicks = 0;
+
     public void getAirCrafts() {
+
+        /*ElementsCollection airCraftCollection = $$(By.cssSelector(".aircraftsBox"));
+        for (int i = 0; i < airCraftCollection.size(); i++) {
+            String aircraftId = airCraftCollection.get(i).$(By.cssSelector(" .aircraftListMiniBox")).getAttribute("id");
+            String aircrftModel = airCraftCollection.get(i).$(By.cssSelector(" .aircraftListMiniBox")).$(By.cssSelector(" .bold")).getText();
+            airCrafts.put(aircraftId, aircrftModel);
+        }*/
+
         $(By.id(CAROUSEL_VIEW)).shouldBe(Condition.visible);
+
+        clicks = $$(By.cssSelector(aircraftsBoxes)).size();
         ElementsCollection airCraftCollection = $$x(collectionOfAirCrafts);
         List<String> locators = new ArrayList<>();
         locators.add(shDistance);
@@ -37,15 +50,19 @@ public class RoutePlaningPage {
             $x(amount).scrollTo().click();
             for (SelenideElement aircraft : airCraftCollection) {
                 String aircraftId = aircraft.getAttribute("id");//.replaceAll("\\D+", "")
-                String aircrftModel = aircraft.findElement(By.xpath(aircraftModel)).getText().replaceAll("(?<= ).*", "").trim();
+                String aircrftModel = aircraft.$(".bold").getText().replaceAll("(?<= ).*", "").trim();
                 airCrafts.put(aircraftId, aircrftModel);
             }
         }
+
+        /*System.out.println("AirCrafts gathered:");
+        System.out.println(airCrafts);*/
         $x(allDistances).scrollTo().click();
     }
 
     public String getAircraftId(String model) {
         String aircraftId = "";
+
         for (Map.Entry<String, String> value : airCrafts.entrySet()) {
             if (value.getValue().contains(model.trim())) {
                 aircraftId = value.getKey();
@@ -67,25 +84,19 @@ public class RoutePlaningPage {
             }
         }*/
 
-        boolean selected = false;
+
         String selectedAircraftId = "";
 
-
-        while (!selected) {
-            if (!airCraftIdSelected.equals(airCraftIdNeeded)) {
-                scrollToTheRight.click();
-                if ($(By.id(airCraftIdNeeded)).isDisplayed()) {
-                    $(By.id(airCraftIdNeeded)).click();
-                    selectedAircraftId = airCraftIdNeeded;
-                    selected = true;
-                    rollBackCursor();
-                }
-            } else {
+        for (int i = 1; i <= clicks; i++) {
+            scrollToTheRight.click();
+            if ($(By.className("aircraftsBox")).$(By.id(airCraftIdNeeded)).isDisplayed()) {
+                $(By.id(airCraftIdNeeded)).click();
                 selectedAircraftId = airCraftIdNeeded;
-                selected = true;
+                rollBackCursor();
+                System.out.println("Id has changed 1");
+                break;
             }
             if (Objects.equals(scrollLineIndicator.getAttribute("style"), "left: 100%;")) {
-                selected = true;
                 System.out.println("Plane not found or check the name search");
             }
         }
@@ -103,18 +114,9 @@ public class RoutePlaningPage {
         while (!returned) {
             scrollToTheLeft.click();
             if (Objects.equals(scrollLineIndicator.getAttribute("style"), "left: 0%;")) {
+                $x("//div[3]/div[2]/div[1]/div[1]/div[2]").click();//first element in the list
                 returned = true;
             }
         }
     }
-
-/*    public void pickDistanceRange(String aircraftRange) {
-        if (aircraftRange.equals("SH")) {
-            $x(shDistance).scrollTo().click();
-        } else if (aircraftRange.equals("MH")) {
-            $x(mhDistance).scrollTo().click();
-        } else {
-            $x(lhDistance).scrollTo().click();
-        }
-    }*/
 }
