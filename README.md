@@ -68,6 +68,8 @@ _Be aware that it applies prices only, and you need to manage your waves separat
 We all want to use our planes on FULL (100%) capacity. That is why [RouteTimeTableOptimizer](src/main/java/AllRoutesDetailsGathering.java) class was created.
 The idea of this class is to group routes by seat configuration and perform as many waves per day as possible where this configuration is used.
 
+BEWARE: If route takes more than 24 hours - this class not gonna works since it will each time try to create a new plane. 
+
 _Explanation:_
 
 Let's imagine you have 2 routes with same seat configuration (ZAD, KIV).
