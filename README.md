@@ -9,7 +9,7 @@ _Airlines Manager is a free aviation management game._
 _In the game, you manage your airline like a real tycoon and strategize to become the greatest CEO in the aviation world!_
 
 This project implements idea of simplifying day to day tasks like managing route prices,
-maintain your panes and so on. 
+maintain your planes and so on. 
 
 ##### Frameworks used
 * [Apache POI](https://poi.apache.org)
